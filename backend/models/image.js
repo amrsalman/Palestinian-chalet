@@ -31,7 +31,6 @@ module.exports = (db, type) => {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          isUrl: true,
           notNull: true,
           notEmpty: true,
         },
