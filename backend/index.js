@@ -6,11 +6,13 @@ const imageRoute = require("./routes/image");
 const chalesRoute = require("./routes/chales");
 const bookchaletRoute = require("./routes/bookchalet");
 const app = express();
+const path = require("path");
 const port = process.env.PORT;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 app.get("/", (req, res) => {
   res.send("hello");
 });
