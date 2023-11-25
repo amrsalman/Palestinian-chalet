@@ -21,6 +21,7 @@ module.exports = (db, type) => {
           key: "nameuser",
         },
         allowNull: false,
+        foreignKey: true,
         validate: {
           is: ["^[a-z]+$", "i"],
           notNull: true,
@@ -34,6 +35,7 @@ module.exports = (db, type) => {
           key: "name",
         },
         allowNull: false,
+        foreignKey: true,
         validate: {
           is: ["^[a-z]+$", "i"],
           notNull: true,
@@ -50,6 +52,14 @@ module.exports = (db, type) => {
       },
       done: {
         type: DataTypes.BOOLEAN,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
+      end: {
+        type: DataTypes.DATE,
         allowNull: false,
         validate: {
           notNull: true,
