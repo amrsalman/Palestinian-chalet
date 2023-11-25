@@ -133,25 +133,54 @@ router.route("/Reservations/:username").get(async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.route("/book/agreeBooking/:id").patch(async (req, res) => {
-  try {
-    const id = req.params.id;
-    const brook = await bookchalet.findByPk(id);
+router
+  .route("/book/agreeBooking/:id")
+  .patch(async (req, res) => {
+    try {
+      const id = req.params.id;
+      const brook = await bookchalet.findByPk(id);
 
-    if (!brook) {
-      return res.status(404).json({ error: "Booking not found" });
+      if (!brook) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
+
+      // Assuming 'done' is a boolean field in your model
+      brook.done = true;
+
+      // Save the updated booking
+      await brook.save();
+
+      res.status(200).json({ message: "Your reservation has been approved" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
+  })
+  .delete(async (req, res) => {
+    try {
+      const id = req.params.id;
+      const brook = await bookchalet.findByPk(id);
 
-    // Assuming 'done' is a boolean field in your model
-    brook.done = true;
+      if (!brook) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
 
-    // Save the updated booking
-    await brook.save();
+      // Assuming 'done' is a boolean field in your model
+      // Optionally, you may want to check if the booking is already approved before deleting
+      if (brook.done) {
+        return res
+          .status(400)
+          .json({ error: "Cannot delete an approved booking" });
+      }
 
-    res.status(200).json({ message: "Your reservation has been approved" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+      // Delete the booking
+      await brook.destroy();
+
+      res.status(200).json({ message: "Your reservation has been canceled" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
 module.exports = router;
