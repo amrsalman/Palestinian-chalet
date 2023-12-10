@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 //import 'home.dart';
-
+import 'package:http/http.dart' as http;
 import 'signup.dart';
 import 'mainpage.dart';
+import 'dart:convert';
 
 class Admin extends StatefulWidget {
   const Admin({
@@ -20,6 +21,58 @@ class _LoginState extends State<Admin> {
   final FocusNode _focusNodePassword = FocusNode();
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
+  Future<void> _login() async {
+    final String url = 'http://10.0.2.2:8080/api/v1/user/login/admin';
+
+    final Map<String, String> body = {
+      'username': _controllerUsername.text,
+      'password': _controllerPassword.text,
+    };
+
+    try {
+      final response = await http.post(Uri.parse(url), body: body);
+
+      if (response.statusCode == 200) {
+        // Successful login
+        final data = json.decode(response.body);
+        print('Logged in: ${data['user']['username']}');
+        // Navigate to the next screen or perform necessary actions
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return Mainpage();
+            },
+          ),
+        );
+      } else if (response.statusCode == 404) {
+        // User not found or invalid credentials
+        print('User not found or invalid credentials.');
+        // Show an error message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Invalid username or password.'),
+          ),
+        );
+      } else {
+        // Handle other HTTP errors
+        print('Login failed: ${response.statusCode}');
+        // Show a generic error message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed. Please try again later.'),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Exception during login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error during login: $e'),
+        ),
+      );
+    }
+  }
 
   bool _obscurePassword = true;
   final Box _boxLogin = Hive.box("login");
@@ -27,38 +80,38 @@ class _LoginState extends State<Admin> {
 
   @override
   Widget build(BuildContext context) {
-
     /*if (_boxLogin.get("loginStatus") ?? false) {
       return home();
     }*/
 
     Color? BackColor = Colors.redAccent;
-    Color? MainColor =  Colors.white10;
+    Color? MainColor = Colors.white10;
 
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-        onPressed: () {Navigator.pushNamed(context, '/');},
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/');
+        },
         child: Icon(Icons.home),
         backgroundColor: Colors.redAccent,
-
-
       ),
       appBar: AppBar(
         backgroundColor: BackColor,
-        title: const Text('Users Login', style: TextStyle(fontSize: 30),),
+        title: const Text(
+          'Users Login',
+          style: TextStyle(fontSize: 30),
+        ),
         centerTitle: true,
-
-        
       ),
       backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         //decoration: BoxDecoration(
         //  image: DecorationImage(
-              //image: AssetImage("assets/images/img3.jpg"),
-            //fit: BoxFit.cover
-          //  )
-      //  ),
+        //image: AssetImage("assets/images/img3.jpg"),
+        //fit: BoxFit.cover
+        //  )
+        //  ),
 
         // key: _formKey,
         //   decoration: const BoxDecoration(
@@ -67,12 +120,10 @@ class _LoginState extends State<Admin> {
         //         fit: BoxFit.cover),
         //   ),
         child: SingleChildScrollView(
-          
           padding: const EdgeInsets.all(30.0),
           child: Column(
-            
             mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment:CrossAxisAlignment.center ,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 80),
               /*Image.asset(
@@ -81,10 +132,11 @@ class _LoginState extends State<Admin> {
                 height: 200, // Set the desired height
               ),*/
               const SizedBox(height: 10),
-               Text(
-                "تسجيل دخول",
-                style: TextStyle(color: BackColor, fontSize: 50, fontFamily: 'RobotoMono')
-              ),
+              Text("تسجيل دخول",
+                  style: TextStyle(
+                      color: BackColor,
+                      fontSize: 50,
+                      fontFamily: 'RobotoMono')),
               const SizedBox(height: 40),
               TextFormField(
                 controller: _controllerUsername,
@@ -158,25 +210,18 @@ class _LoginState extends State<Admin> {
                       ),
                     ),
                     onPressed: () {
-                       //if (_formKey.currentState?.validate() ?? false) {
+                      /*if (_formKey.currentState?.validate() ?? false) {
                         // _boxLogin.put("loginStatus", true);
-                         //_boxLogin.put("userName", _controllerUsername.text);
-                      
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return  Mainpage();
-                            },
-                          ),
-                        );
-                       //}
+                        //_boxLogin.put("userName", _controllerUsername.text);
+                        
+                      }*/
+                      _login();
                     },
                     child: const Text(
                       "الدخول",
-                    style: TextStyle( fontSize: 30, color: Colors.white),),
+                      style: TextStyle(fontSize: 30, color: Colors.white),
+                    ),
                   ),
-                  
                 ],
               ),
             ],
