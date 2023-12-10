@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 //import 'home.dart';
-
+import 'package:http/http.dart' as http;
 import 'signup.dart';
 import 'mainpage.dart';
+import 'dart:convert';
 
 class Login extends StatefulWidget {
   const Login({
@@ -20,6 +21,58 @@ class _LoginState extends State<Login> {
   final FocusNode _focusNodePassword = FocusNode();
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
+  Future<void> _login() async {
+    final String url = 'http://10.0.2.2:8080/api/v1/user/login/client';
+
+    final Map<String, String> body = {
+      'username': _controllerUsername.text,
+      'password': _controllerPassword.text,
+    };
+
+    try {
+      final response = await http.post(Uri.parse(url), body: body);
+
+      if (response.statusCode == 200) {
+        // Successful login
+        final data = json.decode(response.body);
+        print('Logged in: ${data['user']['username']}');
+        // Navigate to the next screen or perform necessary actions
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return Mainpage();
+            },
+          ),
+        );
+      } else if (response.statusCode == 404) {
+        // User not found or invalid credentials
+        print('User not found or invalid credentials.');
+        // Show an error message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Invalid username or password.'),
+          ),
+        );
+      } else {
+        // Handle other HTTP errors
+        print('Login failed: ${response.statusCode}');
+        // Show a generic error message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed. Please try again later.'),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Exception during login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error during login: $e'),
+        ),
+      );
+    }
+  }
 
   bool _obscurePassword = true;
   final Box _boxLogin = Hive.box("login");
@@ -36,21 +89,22 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {Navigator.pushNamed(context, '/');},
+        onPressed: () {
+          Navigator.pushNamed(context, '/');
+        },
         child: Icon(Icons.home),
         backgroundColor: Colors.redAccent,
-
-
       ),
       appBar: AppBar(
         backgroundColor: BackColor,
-        title: const Text('Users Login', style: TextStyle(fontSize: 30),),
+        title: const Text(
+          'Users Login',
+          style: TextStyle(fontSize: 30),
+        ),
         centerTitle: true,
-
-        
       ),
       body: Container(
-          width: double.infinity,
+        width: double.infinity,
         /*decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/images/img3.jpg"),
@@ -68,7 +122,7 @@ class _LoginState extends State<Login> {
           child: Column(
             children: [
               const SizedBox(height: 100),
-            //  Image.asset(
+              //  Image.asset(
               //  'assets/images/5.png', // Add the path to your logo
               //  width: 300, // Set the desired width
               //  height: 200, // Set the desired height
@@ -152,19 +206,12 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     onPressed: () {
-                      //if (_formKey.currentState?.validate() ?? false) {
-                      // _boxLogin.put("loginStatus", true);
-                      //_boxLogin.put("userName", _controllerUsername.text);
-
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return Mainpage();
-                          },
-                        ),
-                      );
-                      //}
+                      /*if (_formKey.currentState?.validate() ?? false) {
+                        // _boxLogin.put("loginStatus", true);
+                        //_boxLogin.put("userName", _controllerUsername.text);
+                        
+                      }*/
+                      _login();
                     },
                     child: const Text(
                       "الدخول",

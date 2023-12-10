@@ -4,6 +4,7 @@ const { chales } = require("../models");
 const multer = require("multer");
 const path = require("path");
 const verifyToken = require("../assets/jwtMiddleware");
+const { Op } = require("sequelize");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "assets/images");
@@ -187,6 +188,32 @@ router.route("/chales/admin/delete/:id").delete(async (req, res) => {
     res.json({ message: "Chale deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+router.route("/search").get(async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    // Define your search criteria
+    const searchCriteria = {
+      [Op.or]: [
+        { name: { [Op.like]: `%${query}%` } },
+        { location: { [Op.like]: `%${query}%` } },
+        { prise: { [Op.like]: query } },
+        { nomber_of_rome: { [Op.like]: query } },
+      ],
+      // Add more fields for searching as needed
+    };
+
+    // Perform the search using Sequelize
+    const results = await chales.findAll({
+      where: searchCriteria,
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

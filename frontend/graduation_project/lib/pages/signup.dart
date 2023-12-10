@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -10,9 +12,7 @@ class Signup extends StatefulWidget {
 
 class _SignupState extends State<Signup> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  
 
-  
   final FocusNode _focusNodeFirstName = FocusNode();
   final FocusNode _focusNodeSecondName = FocusNode();
   final FocusNode _focusNodeBD = FocusNode();
@@ -33,34 +33,88 @@ class _SignupState extends State<Signup> {
   final TextEditingController _controllerConFirmPassword =
       TextEditingController();
 
-
-
   final Box _boxAccounts = Hive.box("accounts");
+  Future<void> signUp() async {
+    final response = await http
+        .post(
+          Uri.parse(
+              'http://10.0.2.2:8080/api/v1/user'), // Replace with your server URL
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode({
+            'username': _controllerUsername.text,
+            'email': _controllerEmail.text,
+            'password': _controllerPassword.text,
+            'phone': _controllerMobile.text,
+            'fname': _controllerFirstName.text,
+            'lname': _controllerSecondName.text,
+            'living': _controllerSecondName.text,
+            'IBNA': _controllerBankAcount.text,
+            'date_of_birth': _controllerBD.text,
+            // Add other relevant fields here
+          }),
+        )
+        .timeout(const Duration(
+            seconds: 30)); // Adjust the timeout duration as needed
+
+    if (response.statusCode == 200) {
+      // Successful signup, handle accordingly
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          width: 200,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          behavior: SnackBarBehavior.floating,
+          content: const Text("تم التسجيل بنجاح !"),
+        ),
+      );
+      print('Signup successful');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text("We sent you an email, please verify your email address"),
+        ),
+      );
+    } else {
+      // Handle errors, show error messages, etc.
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final String errorMessage = responseData['message'] ?? 'Signup failed';
+      print('Signup failed: $errorMessage');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+        ),
+      );
+    }
+  }
+
   bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
-  Color? BackColor = Colors.redAccent;
+    Color? BackColor = Colors.redAccent;
     Color? MainColor = Colors.redAccent;
 
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-        onPressed: () {Navigator.pushNamed(context, '/');},
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/');
+        },
         child: Icon(Icons.home),
         backgroundColor: Colors.redAccent,
-
-
       ),
       appBar: AppBar(
         backgroundColor: BackColor,
-        title: const Text('Sign Up', style: TextStyle(fontSize: 30),),
+        title: const Text(
+          'Sign Up',
+          style: TextStyle(fontSize: 30),
+        ),
         centerTitle: true,
-
-        
       ),
-    
       body: Form(
-        
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -118,7 +172,7 @@ class _SignupState extends State<Signup> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "please enter your firstname ";
-                  } 
+                  }
                   return null;
                 },
                 onEditingComplete: () => _focusNodeSecondName.requestFocus(),
@@ -141,7 +195,7 @@ class _SignupState extends State<Signup> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Please Enter your SecondName";
-                  } 
+                  }
                   return null;
                 },
                 onEditingComplete: () => _focusNodeBD.requestFocus(),
@@ -164,13 +218,11 @@ class _SignupState extends State<Signup> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "please enter your Date of birth ";
-                  } 
+                  }
                   return null;
                 },
                 onEditingComplete: () => _focusNodeEmail.requestFocus(),
               ),
-              
-              
               const SizedBox(height: 10),
               TextFormField(
                 controller: _controllerEmail,
@@ -308,10 +360,9 @@ class _SignupState extends State<Signup> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter your cridet card number";
-                  } 
+                  }
                   return null;
                 },
-              
               ),
               const SizedBox(height: 20),
               Column(
@@ -330,19 +381,7 @@ class _SignupState extends State<Signup> {
                           _controllerUsername.text,
                           _controllerConFirmPassword.text,
                         );
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            width: 200,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            content: const Text("تم التسجيل بنجاح !"),
-                          ),
-                        );
+                        signUp();
 
                         _formKey.currentState?.reset();
 
