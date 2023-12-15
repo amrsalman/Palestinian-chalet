@@ -17,35 +17,45 @@ router
     })();
   })
   .post(async (req, res) => {
-    let body = {
-      username: req.body.username,
-      email: req.body.email,
-      phone: req.body.phone,
-      fname: req.body.fname,
-      lname: req.body.lname,
-      living: req.body.living,
-      password: req.body.password,
-      IBNA: req.body.IBNA,
-      date_of_birth: req.body.date_of_birth,
-    };
-    let Verify = crypto.randomBytes(32).toString("hex");
-    let link = `http://localhost:8080/api/v1/user/Verify/${body.username}/client/${Verify}`;
-    const htmlTemplate = `
+    try {
+      let body = {
+        username: req.body.username,
+        email: req.body.email,
+        phone: req.body.phone,
+        fname: req.body.fname,
+        lname: req.body.lname,
+        living: req.body.living,
+        password: req.body.password,
+        IBNA: req.body.IBNA,
+        date_of_birth: req.body.date_of_birth,
+      };
+      let Verify = crypto.randomBytes(32).toString("hex");
+      let link = `http://localhost:8080/api/v1/user/Verify/${body.username}/client/${Verify}`;
+      const htmlTemplate = `
     <div>
     <p> Click on the link below to verify email</p>
     <a href="${link}">Verify</a>
     </div>`;
-    await user.create(body);
-    let x = {
-      usarname: body.username,
-      crypto: Verify,
-    };
-    await verify.create(x);
-    await sendEmail(body.email, "Verify Your Email", htmlTemplate)
-      .then((user) =>
-        res.json("We sent to you an email, please verify your email addres")
-      )
-      .catch((e) => res.send(e));
+      await user.create(body);
+      let x = {
+        usarname: body.username,
+        crypto: Verify,
+      };
+      await verify.create(x);
+      await sendEmail(body.email, "Verify Your Email", htmlTemplate);
+      res.json({
+        success: true,
+        message: "We sent you an email, please verify your email address",
+      });
+    } catch (error) {
+      // Send failure response
+      console.error("Error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.errors[0].message,
+        error: error.errors[0].message, // Fix variable name: 'error' instead of 'e'
+      });
+    }
   });
 router
   .route("/user/:username")
