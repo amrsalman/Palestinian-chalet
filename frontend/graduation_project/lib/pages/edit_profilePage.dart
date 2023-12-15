@@ -24,6 +24,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     user = UserPreferences.getUser();
   }
+
   Widget build(BuildContext context) => Scaffold(
     appBar: buildAppBar(context),
      body: ListView(
@@ -62,12 +63,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
                    onChanged: (email) => user = user.copy(email: email),
                 ),
                 const SizedBox(height: 24),
+                // Date of Birth TextField
+                TextFieldWidget(
+  label: 'Date of Birth',
+  text: user.dateOfBirth ?? '', // Provide a default empty string if null
+  onChanged: (dob) => user = user.copy(dateOfBirth: dob),
+),
+const SizedBox(height: 24),
+// Mobile Number TextField
+TextFieldWidget(
+  label: 'Mobile Number',
+  text: user.mobileNumber ?? '', // Provide a default empty string if null
+  onChanged: (mobile) => user = user.copy(mobileNumber: mobile),
+),
+                const SizedBox(height: 24),
                 TextFieldWidget(
                   label: 'About',
                   text: user.about,
                   maxLines: 5,
                     onChanged: (about) => user = user.copy(about: about),
-
                 ),
                 const SizedBox(height: 24),
                 ButtonWidget(

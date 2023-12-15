@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:graduation_project/pages/Admin.dart';
+import 'package:graduation_project/pages/Favorites.dart';
 import 'package:graduation_project/pages/home.dart';
 import 'package:graduation_project/pages/signup.dart';
 import 'package:graduation_project/utils/User_preferneces.dart';
@@ -49,6 +50,7 @@ class _MainAppState extends State<MainApp> {
         "/login": (context) => const Login(),
         "/signup": (context) => const Signup(),
         "/Admin": (context) => const Admin(),
+        '/favorites': (context) => FavoritesScreen(favoriteChalets: [],),
       },
         
     

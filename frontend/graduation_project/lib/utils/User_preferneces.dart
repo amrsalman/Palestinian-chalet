@@ -13,6 +13,10 @@ class UserPreferences {
     about:
         'Certified Personal Trainer and Nutritionist with years of experience in creating effective diets and training plans focused on achieving individual customers goals in a smooth way.',
     isDarckMode: false,
+    dateOfBirth : '24/11/2001',
+    mobileNumber: '0597666615',
+
+
   );
   static Future init() async =>
       _prefrences = await SharedPreferences.getInstance();
