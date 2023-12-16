@@ -128,6 +128,8 @@ class _HomepageState extends State<Homepage> {
   String numberOfRooms = '';
   LatLng position = LatLng(0, 0); // Default position, you might want to add UI to select position
   bool hasSwimmingPool = false;
+    String latitude = '';  // New variable for latitude
+  String longitude = ''; // New variable for longitude
   XFile? image;
 
   return showDialog<void>(
@@ -136,7 +138,8 @@ class _HomepageState extends State<Homepage> {
       return StatefulBuilder(  // Use StatefulBuilder to manage the dialog's internal state
         builder: (BuildContext context, StateSetter setState) {
           return AlertDialog(
-            title: Text('Add New Chalet'),
+            title: Text('Add New Chalet',style: TextStyle(color: Colors.redAccent),),
+            
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -155,7 +158,46 @@ class _HomepageState extends State<Homepage> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(hintText: "Enter number of rooms"),
                 ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+    primary: Colors.redAccent, // Background color
+  ),
+  icon: Icon(Icons.map),
+  label: Text('Select Location on Map'),
+  
+  
+  onPressed: () async {
+    final LatLng? result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+
+    if (result != null) { // Check if a result was returned
+      setState(() {
+        latitude = result.latitude.toString();
+        longitude = result.longitude.toString();
+      });
+    }
+  },
+),
+
+// Latitude and Longitude text fields
+TextField(
+  controller: TextEditingController(text: latitude),
+  onChanged: (value) => latitude = value,
+  keyboardType: TextInputType.numberWithOptions(decimal: true),
+  decoration: InputDecoration(hintText: "Enter latitude"),
+),
+TextField(
+  controller: TextEditingController(text: longitude),
+  onChanged: (value) => longitude = value,
+  keyboardType: TextInputType.numberWithOptions(decimal: true),
+  decoration: InputDecoration(hintText: "Enter longitude"),
+),
+                
                  CheckboxListTile(
+                  
+                  
                     title: Text("Has Swimming Pool"),
                     value: hasSwimmingPool,
                     onChanged: (bool? value) {
@@ -163,26 +205,35 @@ class _HomepageState extends State<Homepage> {
                         hasSwimmingPool = value!;
                       });
                     },
+                     checkColor: Colors.white, // color of the tick
+  activeColor: Colors.redAccent, // color of the checkbox
                   ),
                   ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+    primary: Colors.redAccent, // Background color
+  ),
                     child: Text('Select Photo'),
                     onPressed: () async {
                       image = await _pickImage();
                     },
                   ),
+                   
+                  
                 ],
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: Text('Cancel'),
+                child: Text('Cancel',style: TextStyle(color: Colors.redAccent),),
+                
                 onPressed: () => Navigator.of(context).pop(),
               ),
               TextButton(
-                child: Text('Add'),
+                child: Text('Add',style: TextStyle(color: Colors.redAccent)),
                 onPressed: () async {
                   if (image != null) {
                     File imageFile = await _saveImageToFile(image!);
+                  LatLng position = LatLng(double.parse(latitude), double.parse(longitude));
                     _addChalet(chaletName, chaletPrice, imageFile, numberOfRooms, position, hasSwimmingPool);
                     Navigator.of(context).pop();
                   }
@@ -354,3 +405,49 @@ class _HomepageState extends State<Homepage> {
 }
 
 
+class MapScreen extends StatefulWidget {
+  @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  LatLng _selectedPosition = LatLng(32.22762559426675, 35.22060314459795);
+  Set<Marker> _markers = {};
+
+  void _onMapTapped(LatLng position) {
+    setState(() {
+      _selectedPosition = position;
+      _markers = {
+        Marker(
+          markerId: MarkerId('selectedPos'),
+          position: position,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      };
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Select Location'),
+      ),
+      body: GoogleMap(
+          mapType: MapType.hybrid,
+        initialCameraPosition: CameraPosition(
+          target: _selectedPosition,
+          zoom: 14.0,
+        ),
+        markers: _markers,
+        onTap: _onMapTapped,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context, _selectedPosition);
+        },
+        child: Icon(Icons.check),
+      ),
+    );
+  }
+}
