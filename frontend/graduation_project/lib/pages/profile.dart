@@ -31,7 +31,7 @@ class _ProfileState extends State<Profile> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => EditProfilePage()),
                 );
-                 setState(() {});
+                setState(() {});
               },
             ),
             const SizedBox(height: 24),
@@ -50,7 +50,6 @@ class _ProfileState extends State<Profile> {
         children: [
           Text(
             user.name,
-            
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
           ),
           const SizedBox(height: 4),
@@ -58,12 +57,24 @@ class _ProfileState extends State<Profile> {
             user.email,
             style: TextStyle(color: Colors.grey),
           ),
+          const SizedBox(height: 4),
+          Text(
+            'Date of Birth: ${user.dateOfBirth}', // Display Date of Birth
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Mobile Number: ${user.mobileNumber}', // Display Mobile Number
+            style: TextStyle(color: Colors.grey),
+          ),
         ],
       );
+
   Widget BuildUpgradeButton() => ButtonWidget(
         text: 'Upgrade to Pro',
         onClicked: () {},
       );
+
   Widget buildAbout(USER user) => Container(
         padding: EdgeInsets.symmetric(horizontal: 48),
         child: Column(
@@ -76,7 +87,7 @@ class _ProfileState extends State<Profile> {
             const SizedBox(height: 16),
             Text(
               user.about,
-              style: TextStyle(fontSize: 25, height: 1 , fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 25, height: 1, fontWeight: FontWeight.bold),
             ),
           ],
         ),

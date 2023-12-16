@@ -4,7 +4,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/pages/HomePage.dart';
 import 'package:graduation_project/pages/Maps.dart';
-import 'package:graduation_project/pages/favouret.dart';
+import 'package:graduation_project/pages/favorite.dart';
 import 'package:graduation_project/pages/notificationpage.dart';
 import 'package:graduation_project/pages/profile.dart';
 
@@ -20,7 +20,7 @@ class Mainpage extends StatefulWidget {
 class _MainpageState extends State<Mainpage> {
   int index =2;
   final Screens = [
-    Favouret(),
+    Favorite(),
     Maps(),
     Homepage(),
     NotificationPage(),
@@ -62,20 +62,25 @@ class _MainpageState extends State<Mainpage> {
         //backgroundColor: Colors.white,
         
         body: Screens[index],
-        bottomNavigationBar: Theme(
-          data: Theme.of(context)
-              .copyWith(iconTheme: IconThemeData(color: Colors.white)),
-          child: CurvedNavigationBar(
-            color: Colors.white,
-            buttonBackgroundColor: Colors.black87,
-            backgroundColor: Colors.transparent,
-            animationCurve: Curves.easeInOut,
-            animationDuration: Duration(milliseconds: 300),
-            height: 60,
-            items: items,
-            index: index,
-            onTap: (index) => setState(() => this.index = index),
-          ),
-        ));
+        
+        bottomNavigationBar: Padding(
+      padding: EdgeInsets.only(bottom: 10), // Adjust this padding as needed
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        child: CurvedNavigationBar(
+          color: Colors.white,
+          buttonBackgroundColor: Colors.black87,
+          backgroundColor: Colors.transparent,
+          animationCurve: Curves.easeInOut,
+          animationDuration: Duration(milliseconds: 300),
+          height: 60,
+          items: items,
+          index: index,
+          onTap: (index) => setState(() => this.index = index),
+        ),
+      ),
+    ),);
   }
 }
