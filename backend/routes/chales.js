@@ -34,7 +34,7 @@ router
         description: req.body.description,
         gps: {
           type: "Point",
-          coordinates: [req.body.longitude, req.body.latitude], // Modify this according to your payload
+          coordinates: [req.body.latitude, req.body.longitude], // Modify this according to your payload
         },
         main_image: req.file.path,
       });

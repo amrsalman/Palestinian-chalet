@@ -10,6 +10,8 @@ const app = express();
 const path = require("path");
 const port = process.env.PORT;
 
+const cors = require("cors");
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.set("view engine", "ejs");
