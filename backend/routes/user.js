@@ -9,7 +9,7 @@ router
   .get((req, res) => {
     async function x() {
       return await user.findAll({
-        where: { level: 0 },
+        where: { level: 0, verification: true },
       });
     }
     (async () => {

@@ -3,7 +3,7 @@ const router = express.Router();
 const { bookchalet, chales } = require("../models");
 const verifyToken = require("../assets/jwtMiddleware");
 const { Sequelize } = require("sequelize");
-
+const dayjs = require("dayjs");
 router.use(verifyToken);
 
 router
@@ -14,6 +14,46 @@ router
   .post(async (req, res) => {
     try {
       const { username, name, date, end } = req.body;
+
+      // Check if the chalet is already booked in the specified period
+      const existingBooking = await bookchalet.findOne({
+        where: {
+          name: name,
+          [Sequelize.Op.or]: [
+            {
+              date: {
+                [Sequelize.Op.between]: [date, end],
+              },
+            },
+            {
+              end: {
+                [Sequelize.Op.between]: [date, end],
+              },
+            },
+          ],
+        },
+      });
+
+      if (existingBooking) {
+        return res
+          .status(400)
+          .json({ error: "Chalet is already booked for the specified period" });
+      }
+      const startDate = dayjs(date);
+      const endDate = dayjs(end);
+      const numberOfDays = endDate.diff(startDate, "day") + 1;
+      const chalet = await chales.findOne({
+        where: {
+          name: name,
+        },
+      });
+
+      if (!chalet) {
+        return res.status(404).json({ error: "Chalet not found" });
+      }
+
+      const chaletPrice = chalet.prise;
+      const total_prise = numberOfDays * parseFloat(chaletPrice);
       // Create a new booking
       const booking = await bookchalet.create({
         usernamr: username,
@@ -21,6 +61,7 @@ router
         date: date,
         end: end,
         done: false,
+        total_prise: total_prise,
       });
 
       res.status(201).json(booking);

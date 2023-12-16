@@ -66,6 +66,15 @@ module.exports = (db, type) => {
           notEmpty: true,
         },
       },
+      total_prise: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: true,
+          notNull: true,
+          notEmpty: true,
+        },
+      },
     },
     { freezeTableName: true, timestamps: false }
   );
