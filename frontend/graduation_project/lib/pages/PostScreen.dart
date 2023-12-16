@@ -19,8 +19,8 @@ class PostScreen extends StatelessWidget {
           // Image in the upper half of the screen
           Expanded(
             flex: 1,
-            child: Image.file(
-              chalet.photo,
+            child: Image.asset(
+              chalet.path,
               fit: BoxFit.cover,
               width: double.infinity,
             ),
@@ -58,7 +58,6 @@ class PostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    
                     onPressed: () {
                       // Handle booking logic
                     },

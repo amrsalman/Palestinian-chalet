@@ -7,7 +7,10 @@ const verifyToken = require("../assets/jwtMiddleware");
 const { Op } = require("sequelize");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "assets/images");
+    cb(
+      null,
+      "C:/project/Palestinian-chalet/frontend/graduation_project/assets/images"
+    );
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
