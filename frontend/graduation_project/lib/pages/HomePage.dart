@@ -10,6 +10,8 @@ import 'package:graduation_project/pages/PostScreen.dart';
 import 'package:graduation_project/widgets/home_app_bar.dart';
 import 'package:path/path.dart' as path;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:math' as math;
 
 class Chalet {
   String name;
@@ -19,6 +21,7 @@ class Chalet {
   LatLng position;
   bool hasSwimmingPool;
   bool isFavorite;
+  String path;
 
   Chalet({
     required this.name,
@@ -27,7 +30,8 @@ class Chalet {
     required this.numberOfRooms,
     required this.position,
     required this.hasSwimmingPool,
-     this.isFavorite = false, // Initialize as false by default
+    this.isFavorite = false, // Initialize as false by default
+    required this.path,
   });
 
   Map<String, dynamic> toMap() {
@@ -36,24 +40,47 @@ class Chalet {
       'price': price,
       'photo': photo.path,
       'numberOfRooms': numberOfRooms,
-      'position': {'latitude': position.latitude, 'longitude': position.longitude},
+      'position': {
+        'latitude': position.latitude,
+        'longitude': position.longitude
+      },
       'hasSwimmingPool': hasSwimmingPool,
-       'isFavorite': isFavorite,
+      'isFavorite': isFavorite,
     };
   }
 
   factory Chalet.fromMap(Map<String, dynamic> map) {
     return Chalet(
-      name: map['name'],
-      price: map['price'],
-      photo: File(map['photo']),
-      numberOfRooms: map['numberOfRooms'],
+      name: map['name'] ?? '',
+      price: map['prise'].toString() ??
+          '', // Corrected 'prise' to match the Sequelize model
+      photo: File(map['main_image'].startsWith(
+              r"C:\project\Palestinian-chalet\frontend\graduation_project\")
+          ? map['main_image']
+              .substring(
+                  r"C:\project\Palestinian-chalet\frontend\graduation_project\"
+                      .length)
+              .replaceAll('\\', '/')
+          : map['main_image']),
+      numberOfRooms:
+          map['nomber_of_rome'].toString() ?? '', // Corrected 'nomber_of_rome'
       position: LatLng(
-        map['position']['latitude'],
-        map['position']['longitude'],
+        map['gps']['coordinates'][1] ??
+            0.0, // Adjusted to match the Sequelize model
+        map['gps']['coordinates'][0] ??
+            0.0, // Adjusted to match the Sequelize model
       ),
-      hasSwimmingPool: map['hasSwimmingPool'],
-       isFavorite: map['isFavorite'] ?? false, // Default to false if null
+      hasSwimmingPool: map['swimmingPool'] ?? false,
+      isFavorite: map['isFavorite'] ?? false,
+
+      path: map['main_image'].startsWith(
+              r"C:\project\Palestinian-chalet\frontend\graduation_project\")
+          ? map['main_image']
+              .substring(
+                  r"C:\project\Palestinian-chalet\frontend\graduation_project\"
+                      .length)
+              .replaceAll('\\', '/')
+          : map['main_image'],
     );
   }
 }
@@ -71,36 +98,69 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _loadChalets();
   }
+
   List<Chalet> getFavoriteChalets() {
     return chalets.where((chalet) => chalet.isFavorite).toList();
   }
 
   Future<void> _loadChalets() async {
     final prefs = await SharedPreferences.getInstance();
-    final chaletData = prefs.getStringList('chalets') ?? [];
-    List<Chalet> loadedChalets = chaletData.map((chaletString) {
-      return Chalet.fromMap(json.decode(chaletString));
-    }).toList();
 
-    setState(() {
-      chalets = loadedChalets;
-    });
+    // Retrieve the token from shared preferences
+    final String? token = prefs.getString('token');
+    print('token: ${token}');
+    if (token == null) {
+      // Handle the case where the token is not available
+      // You might want to redirect the user to the login screen
+      return;
+    }
+
+    // Continue with making API requests using the token...
+    final String apiUrl =
+        'http://10.0.2.2:8080/api/v1/chales'; // Replace with your API URL
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {'Authorization': token},
+      );
+
+      if (response.statusCode == 200) {
+        // Parse and handle the API response...
+        final List<dynamic> chaletsData = json.decode(response.body);
+        List<Chalet> loadedChalets = chaletsData.map((chaletMap) {
+          return Chalet.fromMap(chaletMap);
+        }).toList();
+
+        setState(() {
+          chalets = loadedChalets;
+        });
+      } else {
+        // Handle API request errors...
+        print('Failed to load chalets: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle API request exceptions...
+      print('Exception during chalet loading: $e');
+    }
   }
 
-  Future<void> _addChalet(String name, String price, File photo, String numberOfRooms, LatLng position, bool hasSwimmingPool) async {
+  Future<void> _addChalet(String name, String price, File photo,
+      String numberOfRooms, LatLng position, bool hasSwimmingPool) async {
     final newChalet = Chalet(
-      name: name, 
-      price: price, 
-      photo: photo,
-      numberOfRooms: numberOfRooms,
-      position: position,
-      hasSwimmingPool: hasSwimmingPool,
-    );
+        name: name,
+        price: price,
+        photo: photo,
+        numberOfRooms: numberOfRooms,
+        position: position,
+        hasSwimmingPool: hasSwimmingPool,
+        path: "jh");
     setState(() {
       chalets.add(newChalet);
     });
     await _saveChalet(newChalet);
   }
+
   Future<void> _saveChalet(Chalet chalet) async {
     final prefs = await SharedPreferences.getInstance();
     final chaletData = prefs.getStringList('chalets') ?? [];
@@ -117,135 +177,143 @@ class _HomepageState extends State<Homepage> {
 
   Future<void> _saveChalets() async {
     final prefs = await SharedPreferences.getInstance();
-    final chaletData = chalets.map((chalet) => json.encode(chalet.toMap())).toList();
+    final chaletData =
+        chalets.map((chalet) => json.encode(chalet.toMap())).toList();
     await prefs.setStringList('chalets', chaletData);
   }
 
-
   Future<void> _showAddChaletDialog() async {
-  String chaletName = '';
-  String chaletPrice = '';
-  String numberOfRooms = '';
-  LatLng position = LatLng(0, 0); // Default position, you might want to add UI to select position
-  bool hasSwimmingPool = false;
-    String latitude = '';  // New variable for latitude
-  String longitude = ''; // New variable for longitude
-  XFile? image;
+    String chaletName = '';
+    String chaletPrice = '';
+    String numberOfRooms = '';
+    LatLng position = LatLng(
+        0, 0); // Default position, you might want to add UI to select position
+    bool hasSwimmingPool = false;
+    String latitude = ''; // New variable for latitude
+    String longitude = ''; // New variable for longitude
+    XFile? image;
 
-  return showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(  // Use StatefulBuilder to manage the dialog's internal state
-        builder: (BuildContext context, StateSetter setState) {
-          return AlertDialog(
-            title: Text('Add New Chalet',style: TextStyle(color: Colors.redAccent),),
-            
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  
-                TextField(
-                  onChanged: (value) => chaletName = value,
-                  decoration: InputDecoration(hintText: "Enter chalet name"),
-                ),
-                TextField(
-                  onChanged: (value) => chaletPrice = value,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(hintText: "Enter chalet price"),
-                ),
-                TextField(
-                  onChanged: (value) => numberOfRooms = value,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(hintText: "Enter number of rooms"),
-                ),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-    primary: Colors.redAccent, // Background color
-  ),
-  icon: Icon(Icons.map),
-  label: Text('Select Location on Map'),
-  
-  
-  onPressed: () async {
-    final LatLng? result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MapScreen()),
-    );
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          // Use StatefulBuilder to manage the dialog's internal state
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(
+                'Add New Chalet',
+                style: TextStyle(color: Colors.redAccent),
+              ),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    TextField(
+                      onChanged: (value) => chaletName = value,
+                      decoration:
+                          InputDecoration(hintText: "Enter chalet name"),
+                    ),
+                    TextField(
+                      onChanged: (value) => chaletPrice = value,
+                      keyboardType: TextInputType.number,
+                      decoration:
+                          InputDecoration(hintText: "Enter chalet price"),
+                    ),
+                    TextField(
+                      onChanged: (value) => numberOfRooms = value,
+                      keyboardType: TextInputType.number,
+                      decoration:
+                          InputDecoration(hintText: "Enter number of rooms"),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.redAccent, // Background color
+                      ),
+                      icon: Icon(Icons.map),
+                      label: Text('Select Location on Map'),
+                      onPressed: () async {
+                        final LatLng? result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MapScreen()),
+                        );
 
-    if (result != null) { // Check if a result was returned
-      setState(() {
-        latitude = result.latitude.toString();
-        longitude = result.longitude.toString();
-      });
-    }
-  },
-),
+                        if (result != null) {
+                          // Check if a result was returned
+                          setState(() {
+                            latitude = result.latitude.toString();
+                            longitude = result.longitude.toString();
+                          });
+                        }
+                      },
+                    ),
 
 // Latitude and Longitude text fields
-TextField(
-  controller: TextEditingController(text: latitude),
-  onChanged: (value) => latitude = value,
-  keyboardType: TextInputType.numberWithOptions(decimal: true),
-  decoration: InputDecoration(hintText: "Enter latitude"),
-),
-TextField(
-  controller: TextEditingController(text: longitude),
-  onChanged: (value) => longitude = value,
-  keyboardType: TextInputType.numberWithOptions(decimal: true),
-  decoration: InputDecoration(hintText: "Enter longitude"),
-),
-                
-                 CheckboxListTile(
-                  
-                  
-                    title: Text("Has Swimming Pool"),
-                    value: hasSwimmingPool,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        hasSwimmingPool = value!;
-                      });
-                    },
-                     checkColor: Colors.white, // color of the tick
-  activeColor: Colors.redAccent, // color of the checkbox
-                  ),
-                  ElevatedButton(
+                    TextField(
+                      controller: TextEditingController(text: latitude),
+                      onChanged: (value) => latitude = value,
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(hintText: "Enter latitude"),
+                    ),
+                    TextField(
+                      controller: TextEditingController(text: longitude),
+                      onChanged: (value) => longitude = value,
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(hintText: "Enter longitude"),
+                    ),
+
+                    CheckboxListTile(
+                      title: Text("Has Swimming Pool"),
+                      value: hasSwimmingPool,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          hasSwimmingPool = value!;
+                        });
+                      },
+                      checkColor: Colors.white, // color of the tick
+                      activeColor: Colors.redAccent, // color of the checkbox
+                    ),
+                    ElevatedButton(
                       style: ElevatedButton.styleFrom(
-    primary: Colors.redAccent, // Background color
-  ),
-                    child: Text('Select Photo'),
-                    onPressed: () async {
-                      image = await _pickImage();
-                    },
+                        primary: Colors.redAccent, // Background color
+                      ),
+                      child: Text('Select Photo'),
+                      onPressed: () async {
+                        image = await _pickImage();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.redAccent),
                   ),
-                   
-                  
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Cancel',style: TextStyle(color: Colors.redAccent),),
-                
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              TextButton(
-                child: Text('Add',style: TextStyle(color: Colors.redAccent)),
-                onPressed: () async {
-                  if (image != null) {
-                    File imageFile = await _saveImageToFile(image!);
-                  LatLng position = LatLng(double.parse(latitude), double.parse(longitude));
-                    _addChalet(chaletName, chaletPrice, imageFile, numberOfRooms, position, hasSwimmingPool);
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                TextButton(
+                  child: Text('Add', style: TextStyle(color: Colors.redAccent)),
+                  onPressed: () async {
+                    if (image != null) {
+                      File imageFile = await _saveImageToFile(image!);
+                      LatLng position = LatLng(
+                          double.parse(latitude), double.parse(longitude));
+                      _addChalet(chaletName, chaletPrice, imageFile,
+                          numberOfRooms, position, hasSwimmingPool);
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _confirmDeleteChalet(Chalet chalet) async {
     showDialog(
       context: context,
@@ -282,13 +350,15 @@ TextField(
     final savedImage = await File(image.path).copy('${appDir.path}/$fileName');
     return savedImage;
   }
+
   void _toggleFavorite(Chalet chalet) async {
     setState(() {
       chalet.isFavorite = !chalet.isFavorite;
     });
     await _saveChalets();
   }
-   void _navigateToFavoritesScreen() {
+
+  void _navigateToFavoritesScreen() {
     List<Chalet> favoriteChalets = getFavoriteChalets();
     Navigator.push(
       context,
@@ -298,93 +368,111 @@ TextField(
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(90.0),
-        child: HomeAppBar(  onFavoritePressed: _navigateToFavoritesScreen,
-        onSearchPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SearchScreen(allChalets: chalets),
-            ),
-          );
-        },),
+        child: HomeAppBar(
+          onFavoritePressed: _navigateToFavoritesScreen,
+          onSearchPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchScreen(allChalets: chalets),
+              ),
+            );
+          },
+        ),
       ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30),
           child: SingleChildScrollView(
             child: Column(
-              children: chalets.map((chalet) => Padding(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  children: [
-                     Align(
-              alignment: Alignment.topRight,
-              child: IconButton(
-                icon: Icon(
-                  chalet.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: chalet.isFavorite ? Colors.red : Colors.grey,
-                ),
-                onPressed: () {
-                _toggleFavorite(chalet);;
-                },
-              ),
-            ),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PostScreen(chalet: chalet),
-                          ),
-                        );
-                      },
-                      onLongPress: () => _confirmDeleteChalet(chalet),
-                      child: Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(15),
-                          image: DecorationImage(
-                            image: FileImage(chalet.photo),
-                            fit: BoxFit.cover,
-                            opacity: 0.8,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: chalets
+                  .map(
+                    (chalet) => Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Column(
                         children: [
-                          Text(
-                            chalet.name,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(
+                              icon: Icon(
+                                chalet.isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: chalet.isFavorite
+                                    ? Colors.red
+                                    : Colors.grey,
+                              ),
+                              onPressed: () {
+                                _toggleFavorite(chalet);
+                              },
                             ),
                           ),
-                          Text(
-                            '\$${chalet.price}',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600],
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PostScreen(chalet: chalet),
+                                ),
+                              );
+                            },
+                            onLongPress: () => _confirmDeleteChalet(chalet),
+                            child: Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(15),
+                                  image: DecorationImage(
+                                    image: Image.asset(
+                                      chalet.path,
+                                    ).image,
+                                    fit: BoxFit.cover,
+                                    opacity: 0.8,
+                                  )),
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    bottom: 10,
+                                    left: 10,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          chalet.name,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(
+                                          '\$${chalet.price}',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
+                          SizedBox(height: 5),
                         ],
                       ),
                     ),
-                    SizedBox(height: 5),
-                  ],
-                ),
-              )).toList(),
+                  )
+                  .toList(),
             ),
           ),
         ),
@@ -398,12 +486,9 @@ TextField(
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      
     );
-    
   }
 }
-
 
 class MapScreen extends StatefulWidget {
   @override
@@ -434,7 +519,7 @@ class _MapScreenState extends State<MapScreen> {
         title: Text('Select Location'),
       ),
       body: GoogleMap(
-          mapType: MapType.hybrid,
+        mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: _selectedPosition,
           zoom: 14.0,

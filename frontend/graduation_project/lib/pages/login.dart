@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'signup.dart';
 import 'mainpage.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({
@@ -35,6 +36,7 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         // Successful login
         final data = json.decode(response.body);
+        await _saveUserData(data['token'], data['user']['username']);
         print('Logged in: ${data['user']['username']}');
         // Navigate to the next screen or perform necessary actions
         Navigator.pushReplacement(
@@ -72,6 +74,12 @@ class _LoginState extends State<Login> {
         ),
       );
     }
+  }
+
+  Future<void> _saveUserData(String token, String username) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('token', token);
+    prefs.setString('username', username);
   }
 
   bool _obscurePassword = true;

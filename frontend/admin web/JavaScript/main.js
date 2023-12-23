@@ -63,7 +63,7 @@ function refreshTableData() {
         }" target="_blank" class="map-link">View on Map</a></td>
                 <td>${chale.description}</td>
                 <td>${chale.nameuser}</td>
-                <td><img src="C:\\project\\Palestinian-chalet\\backend\\${
+                <td><img src="${
                   chale.main_image
                 }" alt="Chale Image" width="40" height="40"></td>
                 <td>
