@@ -3,43 +3,41 @@ import 'package:flutter/material.dart';
 import 'package:graduation_project/widgets/home_app_bar.dart';
 import 'package:graduation_project/pages/HomePage.dart'; // Adjust the import path as needed
 
-
-
 class PostScreen extends StatelessWidget {
   final Chalet chalet;
 
   PostScreen({required this.chalet});
   Future<void> _selectDate(BuildContext context) async {
-  final DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: DateTime.now(), // Current date
-    firstDate: DateTime.now(), // Current date
-    lastDate: DateTime(2101), // Some future date
-    builder: (BuildContext context, Widget? child) {
-      return Theme(
-        data: ThemeData.light().copyWith(
-          // change the background color
-          colorScheme: ColorScheme.light(
-            primary: Colors.redAccent, // header background color
-            onPrimary: Colors.white, // header text color
-            surface: Colors.white, // body background color
-            onSurface: Colors.black, // body text color
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Current date
+      firstDate: DateTime.now(), // Current date
+      lastDate: DateTime(2101), // Some future date
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            // change the background color
+            colorScheme: ColorScheme.light(
+              primary: Colors.redAccent, // header background color
+              onPrimary: Colors.white, // header text color
+              surface: Colors.white, // body background color
+              onSurface: Colors.black, // body text color
+            ),
+            // button colors
+            dialogBackgroundColor: Colors.white,
           ),
-          // button colors
-          dialogBackgroundColor: Colors.white,
-        ),
-        child: child!,
-      );
-    },
-  );
-  if (pickedDate != null) {
-    _showBookingDialog(context, pickedDate);
+          child: child!,
+        );
+      },
+    );
+    if (pickedDate != null) {
+      _showBookingDialog(context, pickedDate);
+    }
   }
-}
+
   // This function shows the booking confirmation dialog
   void _showBookingDialog(BuildContext context, DateTime bookingDate) {
     showDialog(
-      
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -148,6 +146,15 @@ class PostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Text(
+                    '${chalet.city}',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
                     '\$${chalet.price} / day',
                     style: TextStyle(
                       fontSize: 24,
@@ -157,7 +164,7 @@ class PostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Set in Vung Tau, 100 metres from Front Beach, BaLi Motel Vung Tau offers accommodation with a garden, private parking and a shared...', // Short description
+                    '${chalet.description}',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[800],
@@ -177,32 +184,36 @@ class PostScreen extends StatelessWidget {
                     children: [
                       Chip(
                         avatar: Icon(Icons.bed, size: 20),
-                        label: Text('${chalet.numberOfRooms} ',),
+                        label: Text(
+                          '${chalet.numberOfRooms} ',
+                        ),
                       ),
-                     if (chalet.hasSwimmingPool) // Only display if hasSwimmingPool is true
-      Chip(
-        avatar: Icon(Icons.pool, size: 20),
-        label: Text('Pool'),
-      ),
+                      if (chalet
+                          .hasSwimmingPool) // Only display if hasSwimmingPool is true
+                        Chip(
+                          avatar: Icon(Icons.pool, size: 20),
+                          label: Text('Pool'),
+                        ),
                       // ... other amenities chips
                     ],
                   ),
                   Spacer(),
-                 Align(
-      alignment: Alignment.center,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          primary: Colors.redAccent, // Background color
-          onPrimary: Colors.white, // Text color
-          minimumSize: Size(double.infinity, 56), // Button size
-        ),
-        onPressed: () => _selectDate(context),
-        child: Text(
-          'Book Now',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-    ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.redAccent, // Background color
+                        onPrimary: Colors.white, // Text color
+                        minimumSize: Size(double.infinity, 56), // Button size
+                      ),
+                      onPressed: () => _selectDate(context),
+                      child: Text(
+                        'Book Now',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -212,4 +223,3 @@ class PostScreen extends StatelessWidget {
     );
   }
 }
-

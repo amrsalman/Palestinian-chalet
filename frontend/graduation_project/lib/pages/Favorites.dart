@@ -20,12 +20,12 @@ class FavoritesScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           Chalet chalet = favoriteChalets[index];
           return ListTile(
-            leading: Image.file(chalet.photo, width: 100, fit: BoxFit.cover),
+            leading: Image.asset(chalet.path, width: 100, fit: BoxFit.cover),
             title: Text(chalet.name),
             subtitle: Text('\$${chalet.price}'),
-            trailing: chalet.hasSwimmingPool 
-                      ? Icon(Icons.pool, color: Colors.redAccent)
-                      : null,
+            trailing: chalet.hasSwimmingPool
+                ? Icon(Icons.pool, color: Colors.redAccent)
+                : null,
             onTap: () {
               Navigator.push(
                 context,
