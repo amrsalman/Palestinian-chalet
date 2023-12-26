@@ -40,7 +40,8 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: updateSearchQuery,
               decoration: InputDecoration(
                 labelText: 'Search',
-                labelStyle: TextStyle(color: Colors.redAccent), // Red accent label style
+                labelStyle: TextStyle(
+                    color: Colors.redAccent), // Red accent label style
                 border: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.redAccent),
                 ),
@@ -56,7 +57,8 @@ class _SearchScreenState extends State<SearchScreen> {
               itemBuilder: (context, index) {
                 Chalet chalet = searchResults[index];
                 return ListTile(
-                  leading: Image.file(chalet.photo, width: 100, fit: BoxFit.cover),
+                  leading:
+                      Image.asset(chalet.path, width: 100, fit: BoxFit.cover),
                   title: Text(chalet.name),
                   subtitle: Text('\$${chalet.price}'),
                   onTap: () {

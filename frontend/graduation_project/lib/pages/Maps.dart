@@ -29,7 +29,8 @@ class _MapshState extends State<Maps> {
           position: initialPosition,
           infoWindow: InfoWindow(
             title: 'Initial Position',
-            snippet: 'Lat: ${initialPosition.latitude}, Lng: ${initialPosition.longitude}',
+            snippet:
+                'Lat: ${initialPosition.latitude}, Lng: ${initialPosition.longitude}',
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
@@ -45,7 +46,8 @@ class _MapshState extends State<Maps> {
           position: tappedPoint,
           infoWindow: InfoWindow(
             title: 'Selected Location',
-            snippet: 'Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}',
+            snippet:
+                'Lat: ${tappedPoint.latitude}, Lng: ${tappedPoint.longitude}',
           ),
         ),
       );
@@ -59,7 +61,7 @@ class _MapshState extends State<Maps> {
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: initialPosition,
-          zoom: 19,
+          zoom: 8,
         ),
         onMapCreated: (GoogleMapController controller) {
           mapController = controller;

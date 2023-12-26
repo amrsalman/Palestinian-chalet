@@ -47,21 +47,21 @@ router
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
-  })
-  .get(async (req, res) => {
-    try {
-      const { username } = req.body;
-
-      // Find all favorites for the specified user
-      const favorites = await favorite.findAll({
-        where: { username },
-      });
-
-      return res.status(200).json(favorites);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
   });
+router.route("/favorites/:username/:chalet").get(async (req, res) => {
+  try {
+    const { username, chalet } = req.params;
+
+    // Check if the combination of username and chalet exists in favorites
+    const isFavorited = await favorite.findOne({
+      where: { username, chales: chalet },
+    });
+
+    return res.status(200).json({ isFavorited: !!isFavorited });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = router;

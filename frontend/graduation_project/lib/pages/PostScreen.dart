@@ -5,39 +5,167 @@ import 'package:graduation_project/pages/HomePage.dart'; // Adjust the import pa
 
 
 
-class PostScreen extends StatelessWidget {
-  final Chalet chalet;
+class PostScreen extends StatefulWidget {
+   final Chalet chalet;
 
   PostScreen({required this.chalet});
-  Future<void> _selectDate(BuildContext context) async {
-  final DateTime? pickedDate = await showDatePicker(
+
+  @override
+  State<PostScreen> createState() => _PostScreenState();
+}
+
+class _PostScreenState extends State<PostScreen> {
+   void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showConfirmationDialog() {
+  showDialog(
     context: context,
-    initialDate: DateTime.now(), // Current date
-    firstDate: DateTime.now(), // Current date
-    lastDate: DateTime(2101), // Some future date
-    builder: (BuildContext context, Widget? child) {
-      return Theme(
-        data: ThemeData.light().copyWith(
-          // change the background color
-          colorScheme: ColorScheme.light(
-            primary: Colors.redAccent, // header background color
-            onPrimary: Colors.white, // header text color
-            surface: Colors.white, // body background color
-            onSurface: Colors.black, // body text color
-          ),
-          // button colors
-          dialogBackgroundColor: Colors.white,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: child!,
+        title: Text(
+          'Booking confirmation',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.redAccent,
+          ),
+        ),
+        content: Container(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start
+            children: <Widget>[
+              // Section for Start Date
+              Row(
+                children: <Widget>[
+                  Icon(Icons.calendar_today, color: Colors.grey),
+                  SizedBox(width: 10),
+                  Text('Start Date: ${startDate!.toLocal().toString().split(' ')[0]}'), // Only date part
+                ],
+              ),
+              SizedBox(height: 20),
+              // Section for End Date
+              Row(
+                children: <Widget>[
+                  Icon(Icons.calendar_today, color: Colors.grey),
+                  SizedBox(width: 10),
+                  Text('End Date: ${endDate!.toLocal().toString().split(' ')[0]}'), // Only date part
+                ],
+              ),
+              SizedBox(height: 20),
+              // Section for Total Price
+              Row(
+                children: <Widget>[
+                  Icon(Icons.attach_money, color: Colors.grey),
+                  SizedBox(width: 10),
+                  Text('\$${bookingPrice?.toStringAsFixed(2)}'),
+                ],
+              ),
+              SizedBox(height: 20),
+              // Additional details can be added here
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancel',style: TextStyle(color: Colors.redAccent),),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            child: Text('Book this session'),
+            onPressed: () {
+              // Handle the booking confirmation logic
+              Navigator.of(context).pop();
+              // Optionally, show a final confirmation message or perform further actions
+            },
+            style: ElevatedButton.styleFrom(
+              primary: Colors.redAccent, // background
+              onPrimary: Colors.white, // foreground
+            ),
+          ),
+        ],
       );
     },
   );
-  if (pickedDate != null) {
-    _showBookingDialog(context, pickedDate);
-  }
 }
+
+   DateTime? startDate;
+  DateTime? endDate;
+  double? bookingPrice;
+Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? pickedDateRange = await showDateRangePicker(
+      context: context,
+      initialDateRange: startDate != null && endDate != null
+          ? DateTimeRange(start: startDate!, end: endDate!)
+          : null,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.redAccent,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
+    );
+   if (pickedDateRange != null) {
+      startDate = pickedDateRange.start;
+      endDate = pickedDateRange.end;
+      setState(() {
+        _calculateBookingPrice();
+        // Call the confirmation dialog after state update
+        _showConfirmationDialog();
+      });
+    }
+  }
+
+  void _calculateBookingPrice() {
+    if (startDate != null && endDate != null) {
+      final int days = endDate!.difference(startDate!).inDays + 1;
+      final double? chaletPrice = double.tryParse(widget.chalet.price);
+      if (chaletPrice != null && days > 0) {
+        bookingPrice = days * chaletPrice;
+      } else {
+        bookingPrice = null;
+      }
+    } else {
+      bookingPrice = null;
+    }
+  }
+
+
   // This function shows the booking confirmation dialog
-  void _showBookingDialog(BuildContext context, DateTime bookingDate) {
+  void _showBookingDialog(BuildContext context, DateTime bookingDate , ) {
     showDialog(
       
       context: context,
@@ -65,7 +193,6 @@ class PostScreen extends StatelessWidget {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,15 +220,15 @@ class PostScreen extends StatelessWidget {
       ),
       extendBodyBehindAppBar: true,
       body: Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: Image.asset(
-              chalet.path,
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
+      children: [
+        Expanded(
+          flex: 5,
+          child: Image.asset(
+            widget.chalet.path, // Use widget.chalet here
+            fit: BoxFit.cover,
+            width: double.infinity,
           ),
+        ),
           Expanded(
             flex: 5,
             child: Container(
@@ -118,7 +245,7 @@ class PostScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    chalet.name,
+                    widget.chalet.name,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -130,7 +257,7 @@ class PostScreen extends StatelessWidget {
                       Icon(Icons.location_on, size: 20, color: Colors.grey),
                       SizedBox(width: 4),
                       Text(
-                        '${chalet.position.latitude},${chalet.position.longitude}', // Replace with actual location
+                        '${widget.chalet.position.latitude},${widget.chalet.position.longitude}', // Replace with actual location
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     ],
@@ -148,7 +275,7 @@ class PostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    '\$${chalet.price} / day',
+                    '${widget.chalet.city}',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
@@ -157,7 +284,16 @@ class PostScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Set in Vung Tau, 100 metres from Front Beach, BaLi Motel Vung Tau offers accommodation with a garden, private parking and a shared...', // Short description
+                    '\$${widget.chalet.price} / day',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    '${widget.chalet.description}',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[800],
@@ -177,32 +313,36 @@ class PostScreen extends StatelessWidget {
                     children: [
                       Chip(
                         avatar: Icon(Icons.bed, size: 20),
-                        label: Text('${chalet.numberOfRooms} ',),
+                        label: Text(
+                          '${widget.chalet.numberOfRooms} ',
+                        ),
                       ),
-                     if (chalet.hasSwimmingPool) // Only display if hasSwimmingPool is true
-      Chip(
-        avatar: Icon(Icons.pool, size: 20),
-        label: Text('Pool'),
-      ),
+                      if (widget.chalet
+                          .hasSwimmingPool) // Only display if hasSwimmingPool is true
+                        Chip(
+                          avatar: Icon(Icons.pool, size: 20),
+                          label: Text('Pool'),
+                        ),
                       // ... other amenities chips
                     ],
                   ),
                   Spacer(),
-                 Align(
-      alignment: Alignment.center,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          primary: Colors.redAccent, // Background color
-          onPrimary: Colors.white, // Text color
-          minimumSize: Size(double.infinity, 56), // Button size
-        ),
-        onPressed: () => _selectDate(context),
-        child: Text(
-          'Book Now',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-    ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.redAccent, // Background color
+                        onPrimary: Colors.white, // Text color
+                        minimumSize: Size(double.infinity, 56), // Button size
+                      ),
+                      onPressed: () => _selectDateRange(context),
+                      child: Text(
+                        'Book Now',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -212,4 +352,3 @@ class PostScreen extends StatelessWidget {
     );
   }
 }
-
