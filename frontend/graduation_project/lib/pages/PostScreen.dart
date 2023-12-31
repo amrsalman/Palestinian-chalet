@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/widgets/home_app_bar.dart';
 import 'package:graduation_project/pages/HomePage.dart'; // Adjust the import path as needed
-
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PostScreen extends StatefulWidget {
-   final Chalet chalet;
+  final Chalet chalet;
 
   PostScreen({required this.chalet});
 
@@ -15,7 +16,7 @@ class PostScreen extends StatefulWidget {
 }
 
 class _PostScreenState extends State<PostScreen> {
-   void _showErrorDialog(String title, String message) {
+  void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -27,7 +28,6 @@ class _PostScreenState extends State<PostScreen> {
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
-                
               },
             ),
           ],
@@ -35,87 +35,140 @@ class _PostScreenState extends State<PostScreen> {
       },
     );
   }
-  void _showConfirmationDialog() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          'Booking confirmation',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.redAccent,
+
+  void _showConfirmationDialog() async {
+    final bool confirmed = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        content: Container(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start
-            children: <Widget>[
-              // Section for Start Date
-              Row(
-                children: <Widget>[
-                  Icon(Icons.calendar_today, color: Colors.grey),
-                  SizedBox(width: 10),
-                  Text('Start Date: ${startDate!.toLocal().toString().split(' ')[0]}'), // Only date part
-                ],
-              ),
-              SizedBox(height: 20),
-              // Section for End Date
-              Row(
-                children: <Widget>[
-                  Icon(Icons.calendar_today, color: Colors.grey),
-                  SizedBox(width: 10),
-                  Text('End Date: ${endDate!.toLocal().toString().split(' ')[0]}'), // Only date part
-                ],
-              ),
-              SizedBox(height: 20),
-              // Section for Total Price
-              Row(
-                children: <Widget>[
-                  Icon(Icons.attach_money, color: Colors.grey),
-                  SizedBox(width: 10),
-                  Text('\$${bookingPrice?.toStringAsFixed(2)}'),
-                ],
-              ),
-              SizedBox(height: 20),
-              // Additional details can be added here
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: Text('Cancel',style: TextStyle(color: Colors.redAccent),),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          ElevatedButton(
-            child: Text('Book this session'),
-            onPressed: () {
-              // Handle the booking confirmation logic
-              Navigator.of(context).pop();
-              // Optionally, show a final confirmation message or perform further actions
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.redAccent, // background
-              onPrimary: Colors.white, // foreground
+          title: Text(
+            'Booking confirmation',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.redAccent,
             ),
           ),
-        ],
-      );
-    },
-  );
-}
+          content: Container(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Icon(Icons.calendar_today, color: Colors.grey),
+                    SizedBox(width: 10),
+                    Text(
+                        'Start Date: ${startDate!.toLocal().toString().split(' ')[0]}'), // Only date part
+                  ],
+                ),
+                SizedBox(height: 20),
+                // Section for End Date
+                Row(
+                  children: <Widget>[
+                    Icon(Icons.calendar_today, color: Colors.grey),
+                    SizedBox(width: 10),
+                    Text(
+                        'End Date: ${endDate!.toLocal().toString().split(' ')[0]}'), // Only date part
+                  ],
+                ),
+                SizedBox(height: 20),
+                // Section for Total Price
+                Row(
+                  children: <Widget>[
+                    Icon(Icons.attach_money, color: Colors.grey),
+                    SizedBox(width: 10),
+                    Text('\$${bookingPrice?.toStringAsFixed(2)}'),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // Display booking details (start date, end date, price, etc.)
+                // Use startDate, endDate, bookingPrice, or relevant variables here
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel', style: TextStyle(color: Colors.redAccent)),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton(
+              child: Text('Book this session'),
+              onPressed: () async {
+                Navigator.of(context).pop(true);
+                final prefs = await SharedPreferences.getInstance();
+                final String? user = prefs.getString('username');
+                final String? token = prefs.getString('token');
+                if (user == null) {
+                  // Handle the case where the user is not logged in
+                  return;
+                }
+                final String apiUrl =
+                    'http://10.0.2.2:8080/api/v1/bookchalet'; // Replace with your API URL
+                final Map<String, dynamic> requestData = {
+                  'username': user, // Replace with actual username
+                  'name': widget.chalet
+                      .name, // Assuming widget.chalet contains chalet details
+                  'date':
+                      startDate!.toIso8601String(), // Convert date to string
+                  'end': endDate!.toIso8601String(), // Convert date to string
+                };
 
-   DateTime? startDate;
+                final http.Response response = await http.post(
+                  Uri.parse(apiUrl),
+                  headers: <String, String>{
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    'Authorization': '$token',
+                  },
+                  body: jsonEncode(requestData),
+                );
+
+                if (response.statusCode == 201) {
+                  final Map<String, dynamic> data = json.decode(response.body);
+                  print('Booking successful');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Booking successful'),
+                    ),
+                  );
+                  // Handle success, update UI, show success message, etc.
+                } else {
+                  final Map<String, dynamic> responseData =
+                      json.decode(response.body);
+                  final errorMessage = responseData['error'];
+                  print(errorMessage);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(errorMessage),
+                    ),
+                  );
+                  // Handle failure, update UI, show error message, etc.
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.redAccent,
+                onPrimary: Colors.white,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != null && confirmed) {
+      // Handle post-booking actions or UI updates if needed
+    }
+  }
+
+  DateTime? startDate;
   DateTime? endDate;
   double? bookingPrice;
-Future<void> _selectDateRange(BuildContext context) async {
+  Future<void> _selectDateRange(BuildContext context) async {
     final DateTimeRange? pickedDateRange = await showDateRangePicker(
       context: context,
       initialDateRange: startDate != null && endDate != null
@@ -138,7 +191,7 @@ Future<void> _selectDateRange(BuildContext context) async {
         );
       },
     );
-   if (pickedDateRange != null) {
+    if (pickedDateRange != null) {
       startDate = pickedDateRange.start;
       endDate = pickedDateRange.end;
       setState(() {
@@ -163,11 +216,12 @@ Future<void> _selectDateRange(BuildContext context) async {
     }
   }
 
-
   // This function shows the booking confirmation dialog
-  void _showBookingDialog(BuildContext context, DateTime bookingDate , ) {
+  void _showBookingDialog(
+    BuildContext context,
+    DateTime bookingDate,
+  ) {
     showDialog(
-      
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -193,6 +247,7 @@ Future<void> _selectDateRange(BuildContext context) async {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,15 +275,15 @@ Future<void> _selectDateRange(BuildContext context) async {
       ),
       extendBodyBehindAppBar: true,
       body: Column(
-      children: [
-        Expanded(
-          flex: 5,
-          child: Image.asset(
-            widget.chalet.path, // Use widget.chalet here
-            fit: BoxFit.cover,
-            width: double.infinity,
+        children: [
+          Expanded(
+            flex: 5,
+            child: Image.asset(
+              widget.chalet.path, // Use widget.chalet here
+              fit: BoxFit.cover,
+              width: double.infinity,
+            ),
           ),
-        ),
           Expanded(
             flex: 5,
             child: Container(
