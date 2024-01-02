@@ -312,7 +312,7 @@ class _PostScreenState extends State<PostScreen> {
                       Icon(Icons.location_on, size: 20, color: Colors.grey),
                       SizedBox(width: 4),
                       Text(
-                        '${widget.chalet.position.latitude},${widget.chalet.position.longitude}', // Replace with actual location
+                        '${widget.chalet.position.longitude},${widget.chalet.position.latitude}', // Replace with actual location
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     ],
