@@ -6,7 +6,7 @@ import 'signup.dart';
 import 'mainpage.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:graduation_project/pages/Forget_Password.dart';
 class Login extends StatefulWidget {
   const Login({
     Key? key,
@@ -261,7 +261,7 @@ class _LoginState extends State<Login> {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                return const Signup();
+                                return const ForgotPasswordPage();
                               },
                             ),
                           );
