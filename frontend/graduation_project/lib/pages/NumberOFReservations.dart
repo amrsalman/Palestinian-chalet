@@ -1,72 +1,55 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Chalet class definition
-class Chalet {
-  final String name;
-  final String price;
-  final String photo;
-  final String clientName;
-  final String city;
-
-  final String date;
-
-  Chalet({
-    required this.name,
-    required this.price,
-    required this.photo,
-    required this.clientName,
-    required this.city,
-    
-    required this.date,
-  });
+class NumberOfReservations extends StatefulWidget {
+  @override
+  _NumberOfReservationsState createState() => _NumberOfReservationsState();
 }
 
-class NumberOfReservations extends StatelessWidget {
-  final List<Chalet> allChalets = [
-    Chalet(
-      name: 'Amer',
-      price: '200',
-      photo: 'assets/images/img1.jpg', // Replace with your asset or network image
-      clientName: 'John Doe',
-      city: 'City A',
-  
+class _NumberOfReservationsState extends State<NumberOfReservations> {
+  List<Chalet> myBookedChalets = [];
+  late SharedPreferences prefs;
+  String? token;
+  String? username;
 
-      date: '2024-01-05',
-    ),
-    Chalet(
-      name: 'Amer',
-      price: '250',
-      photo: 'assets/images/img2.jpg', // Replace with your asset or network image
-      clientName: 'Jane Smith',
-      city: 'City B',
-    
-      date: '2024-01-06',
-    ),
-    Chalet(
-      name: 'Amer',
-      price: '300',
-      photo: 'assets/images/img3.jpg', // Replace with your asset or network image
-      clientName: 'Alice Johnson',
-      city: 'City C',
-  
-      date: '2024-01-07',
-    ),
-    Chalet(
-      name: 'Omar',
-      price: '350',
-      photo: 'assets/images/img4.jpg', // Replace with your asset or network image
-      clientName: 'Bob Brown',
-      city: 'City D',
+  @override
+  void initState() {
+    super.initState();
+    fetchMyBookedChalets();
+  }
 
-      date: '2024-01-08',
-    ),
-  ];
+  Future<void> fetchMyBookedChalets() async {
+    prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token');
+    username = prefs.getString('username');
 
- @override
+    if (token == null || username == null) {
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/BookingChales/$username'),
+        headers: {'Authorization': '$token'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          myBookedChalets = data.map((chaletJson) => Chalet.fromJson(chaletJson)).toList();
+        });
+      } else {
+        print('Failed to fetch booked chalets. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching booked chalets: $error');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final chaletsNamedAmer = allChalets.where((chalet) => chalet.name == 'Amer').toList();
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -81,16 +64,56 @@ class NumberOfReservations extends StatelessWidget {
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 1 / 1.2, // Adjusted aspect ratio for larger images
+          childAspectRatio: 1 / 1.2,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
-        itemCount: chaletsNamedAmer.length,
+        itemCount: myBookedChalets.length,
         padding: EdgeInsets.all(10),
         itemBuilder: (context, index) {
-          return ChaletGridItem(chalet: chaletsNamedAmer[index]);
+          return ChaletGridItem(chalet: myBookedChalets[index]);
         },
       ),
+    );
+  }
+}
+
+class Chalet {
+  final String name;
+  final int price;
+  final String photo;
+  final String clientName;
+  final String city;
+  final String date;
+
+  Chalet({
+    required this.name,
+    required this.price,
+    required this.photo,
+    required this.clientName,
+    required this.city,
+    required this.date,
+  });
+
+  factory Chalet.fromJson(Map<String, dynamic> json) {
+     String mainImage = json['chalet']['main_image'];
+
+    if (mainImage.startsWith(
+        r"C:\project\Palestinian-chalet\frontend\graduation_project\")) {
+      mainImage = mainImage
+          .substring(
+              r"C:\project\Palestinian-chalet\frontend\graduation_project\"
+                  .length)
+          .replaceAll('\\', '/');
+    }
+
+    return Chalet(
+      name: json['chalet']['name'],
+      price: json['total_prise'],
+      photo: mainImage,
+      clientName: json['chalet']['owner'],
+      city: json['chalet']['location'],
+      date: json['date'],
     );
   }
 }
@@ -120,7 +143,7 @@ class ChaletGridItem extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3, // Adjust space for text
+            flex: 4, // Adjust space for text
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(

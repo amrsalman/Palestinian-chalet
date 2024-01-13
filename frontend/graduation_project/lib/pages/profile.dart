@@ -6,26 +6,65 @@ import 'package:graduation_project/widgets/AppBar_widget.dart';
 import 'package:graduation_project/widgets/Button_widget.dart';
 import 'package:graduation_project/widgets/Profile_widget.dart';
 import 'package:graduation_project/widgets/Number_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // Import for json.decode
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  const Profile({Key? key}) : super(key: key);
 
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
+  late SharedPreferences prefs;
+  String? token;
+  String? username;
+  Map<String, dynamic>? userData; // Store user data received from the backend
+
   @override
+  void initState() {
+    super.initState();
+    initPreferences();
+  }
+
+  Future<void> initPreferences() async {
+    prefs = await SharedPreferences.getInstance();
+
+    // Retrieve the token from shared preferences
+    token = prefs.getString('token');
+    print('token: ${token}');
+    username = prefs.getString('username');
+    if (token == null || username == null) {
+      // Handle the case where the token is not available
+      // You might want to redirect the user to the login screen
+      return;
+    }
+
+    // Fetch user data from the backend using the username
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/user/$username'));
+    if (response.statusCode == 200) {
+      // Parse the response and update your UI with the user details
+      userData = json.decode(response.body);
+    } else {
+      // Handle errors
+      print('Failed to load user data');
+    }
+
+    setState(() {});
+  }
+
+@override
   Widget build(BuildContext context) {
-    final user = UserPreferences.getUser();
     return Scaffold(
+      
       appBar: buildAppBar(context),
-        
       
       body: ListView(
         physics: BouncingScrollPhysics(),
         children: [
-           SizedBox(
+          SizedBox(
             height: 135, // Adjust the size to fit your design
             child: Center(
               child: CircleAvatar(
@@ -39,43 +78,36 @@ class _ProfileState extends State<Profile> {
               ),
             ),
           ),
-          // ProfileWidget(
-          //   imagePath: user.imagepath, // Make sure this points to the right variable
-          //   onClicked: () async {
-          //     await Navigator.of(context).push(
-          //       MaterialPageRoute(builder: (context) => EditProfilePage()),
-          //     );
-          //     setState(() {});
-          //   },
-          // ),
           const SizedBox(height: 24),
              NumbersWidget(),
           const SizedBox(height: 24),
-          buildUserInfo('Name', user.name, Icons.person),
-          const SizedBox(height: 24),
-        buildUserInfo('Birthday', user.dateOfBirth.toString(), Icons.cake),
-        const SizedBox(height: 24),
-buildUserInfo('Phone', user.mobileNumber.toString(), Icons.phone),
-const SizedBox(height: 24),
-
-         // Replace with actual data
-          buildUserInfo('Email', user.email, Icons.email),
-          
+          // Display user data in the UI
+          if (userData != null) ...[
+            buildUserInfo('User Name', userData!['username'], Icons.person),
+            const SizedBox(height: 24),
+            buildUserInfo('Birthday', userData!['date_of_birth'], Icons.cake),
+            const SizedBox(height: 24),
+            buildUserInfo('Phone', userData!['phone'], Icons.phone),
+            const SizedBox(height: 24),
+            buildUserInfo('Email', userData!['email'], Icons.email),
+            // Add more fields as needed
+          ],
           SizedBox(height: 30),
-        
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 48),
             child: ElevatedButton(
               child: Text('Edit Profile'),
-              onPressed: ()  async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => EditProfilePage()),
-              );
-              setState(() {});
-            },
+              onPressed: () async {
+                // Navigate to the edit profile page
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => EditProfilePage()),
+                );
+                // Reload user data after editing
+                await initPreferences();
+              },
               style: ElevatedButton.styleFrom(
-                primary: Colors.redAccent, // Background color
-                onPrimary: Colors.white, // Text color
+                primary: Colors.redAccent,
+                onPrimary: Colors.white,
               ),
             ),
           ),
@@ -84,12 +116,13 @@ const SizedBox(height: 24),
     );
   }
 
+
   Widget buildUserInfo(String title, String data, IconData icon) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          Icon(icon, color: Colors.redAccent), // Icon with color
+          Icon(icon, color: Colors.redAccent),
           SizedBox(width: 30),
           Expanded(
             child: Column(
