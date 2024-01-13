@@ -46,23 +46,23 @@ class Home extends StatelessWidget {
             
             
           ),
-           SizedBox(height: 20,),
-           ElevatedButton(
-                  onPressed: () {
-                  Navigator.pushNamed(context, '/Admin');
-              // Navigate to the second screen when tapped.
-            },
-            child: const Text('Admin Login' ,style: TextStyle(fontSize: 22),),
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.redAccent),
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 95, vertical: 15)),
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(66)))
+          //  SizedBox(height: 20,),
+          //  ElevatedButton(
+          //         onPressed: () {
+          //         Navigator.pushNamed(context, '/Admin');
+          //     // Navigate to the second screen when tapped.
+          //   },
+          //   child: const Text('Admin Login' ,style: TextStyle(fontSize: 22),),
+          //   style: ButtonStyle(
+          //     backgroundColor: MaterialStateProperty.all(Colors.redAccent),
+          //     padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 95, vertical: 15)),
+          //     shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(66)))
 
 
 
 
-            ),
-           ),
+          //   ),
+          //  ),
           SizedBox(height: 20,),
             ElevatedButton(
                   onPressed: () {

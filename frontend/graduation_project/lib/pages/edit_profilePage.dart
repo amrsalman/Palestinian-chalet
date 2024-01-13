@@ -26,30 +26,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget build(BuildContext context) => Scaffold(
-    appBar: buildAppBar(context),
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
+          onPressed: () => Navigator.of(context).pop(),
+          
+        ),
+title: Text('Edit Profile ', style: TextStyle(color: Colors.redAccent),),
+centerTitle: true,
+    ),
      body: ListView(
               padding: EdgeInsets.symmetric(horizontal: 32),
               physics: BouncingScrollPhysics(),
               children: [
-                ProfileWidget(
-                  imagePath: user.imagepath,
-                  isEdit: true,
+                // ProfileWidget(
+                //   imagePath: user.imagepath,
+                //   isEdit: true,
                   
-                  onClicked: () async {
-                     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+                //   onClicked: () async {
+                //      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
                         
               
 
-                    if (image == null) return;
-                    final directory = await getApplicationDocumentsDirectory();
-                    final name = basename(image.path);
-                     final imageFile = File('${directory.path}/$name');
-                       final newImage =
-                        await File(image.path).copy(imageFile.path);
+                //     if (image == null) return;
+                //     final directory = await getApplicationDocumentsDirectory();
+                //     final name = basename(image.path);
+                //      final imageFile = File('${directory.path}/$name');
+                //        final newImage =
+                //         await File(image.path).copy(imageFile.path);
 
-                    setState(() => user = user.copy(imagePath: newImage.path));
-                  },
-                ),
+                //     setState(() => user = user.copy(imagePath: newImage.path));
+                //   },
+                // ),
                  const SizedBox(height: 24),
                 TextFieldWidget(
                   label: 'Full Name',
@@ -77,12 +87,12 @@ TextFieldWidget(
   onChanged: (mobile) => user = user.copy(mobileNumber: mobile),
 ),
                 const SizedBox(height: 24),
-                TextFieldWidget(
-                  label: 'About',
-                  text: user.about,
-                  maxLines: 5,
-                    onChanged: (about) => user = user.copy(about: about),
-                ),
+                // TextFieldWidget(
+                //   label: 'About',
+                //   text: user.about,
+                //   maxLines: 5,
+                //     onChanged: (about) => user = user.copy(about: about),
+                // ),
                 const SizedBox(height: 24),
                 ButtonWidget(
                   text: 'Save',

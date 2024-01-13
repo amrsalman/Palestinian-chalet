@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:graduation_project/pages/NumberOFReservations.dart';
 
 class NumbersWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          buildButton(context, '4.8', 'Ranking'),
-          buildDivider(),
-          buildButton(context, '50', 'Number of reservations'),
+          buildButton(context, '5', 'Number of reservations'),
         ],
       );
+
   Widget buildDivider() => Container(
         height: 24,
         child: VerticalDivider(),
@@ -18,7 +18,13 @@ class NumbersWidget extends StatelessWidget {
   Widget buildButton(BuildContext context, String value, String text) =>
       MaterialButton(
         padding: EdgeInsets.symmetric(vertical: 4),
-        onPressed: () {},
+        onPressed: () {
+          // Navigate to the NumberOfReservations screen when the button is pressed
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NumberOfReservations()),
+          );
+        },
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
