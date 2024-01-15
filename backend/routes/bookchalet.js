@@ -110,10 +110,8 @@ router.route("/BookingChales/:username").get(async (req, res) => {
     const mybookedChalets = await bookchalet.findAll({
       where: {
         usernamr: req.params.username,
-        done: true,
       },
     });
-
     if (mybookedChalets.length === 0) {
       // Handle the case where no booked chalets are found for the given username
       return res
@@ -121,7 +119,45 @@ router.route("/BookingChales/:username").get(async (req, res) => {
         .json({ error: "No booked chalets found for the given username." });
     }
 
-    res.status(200).json(mybookedChalets);
+    // جمع جميع أسماء الشاليهات المحجوزة
+    const bookedChaletNames = mybookedChalets.map((booking) => booking.name);
+
+    // استعلام للحصول على معلومات الشاليهات المحجوزة
+    const chaletsInfo = await chales.findAll({
+      where: {
+        name: bookedChaletNames,
+      },
+      attributes: [
+        "name",
+        "location",
+        "prise",
+        "main_image",
+        "gps",
+        "nameuser",
+      ],
+    });
+
+    // تنسيق النتائج
+    const formattedResults = mybookedChalets.map((booking) => {
+      const chaletInfo = chaletsInfo.find(
+        (chalet) => chalet.name === booking.name
+      );
+
+      return {
+        date: booking.date,
+        total_prise: booking.total_prise,
+        chalet: {
+          name: chaletInfo.name,
+          location: chaletInfo.location,
+          prise: chaletInfo.prise,
+          main_image: chaletInfo.main_image,
+          gps: chaletInfo.gps,
+          owner: chaletInfo.nameuser,
+        },
+      };
+    });
+
+    res.status(200).json(formattedResults);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -164,7 +200,6 @@ router.route("/Reservations/:username").get(async (req, res) => {
     x = myunstableChalets.map((booking) => booking.dataValues.name);
     const unstableChalets = await bookchalet.findAll({
       where: {
-        done: true,
         name: x,
       },
     });

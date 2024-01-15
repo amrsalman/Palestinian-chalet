@@ -388,13 +388,11 @@ class _PostScreenState extends State<PostScreen> {
                       style: ElevatedButton.styleFrom(
                         primary: Colors.redAccent, // Background color
                         onPrimary: Colors.white, // Text color
-                        minimumSize: Size(double.infinity, 56), // Button size
                       ),
                       onPressed: () => _selectDateRange(context),
                       child: Text(
-                        'Book Now',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                        'Select Date Range',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
