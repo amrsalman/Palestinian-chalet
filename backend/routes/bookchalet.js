@@ -200,7 +200,6 @@ router.route("/Reservations/:username").get(async (req, res) => {
     x = myunstableChalets.map((booking) => booking.dataValues.name);
     const unstableChalets = await bookchalet.findAll({
       where: {
-        done: true,
         name: x,
       },
     });

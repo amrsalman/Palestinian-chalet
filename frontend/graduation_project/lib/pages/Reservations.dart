@@ -1,84 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Chalet class definition
 class Chalet {
-  final String name;
-  final String price;
-  final String photo;
+  //final String name;
   final String clientName;
-  final String city;
-
-  final String date;
+  final String chaletName;
+  final int totalPrice;
+  final String startDate;
+  final String endDate;
 
   Chalet({
-    required this.name,
-    required this.price,
-    required this.photo,
+    //required this.name,
     required this.clientName,
-    required this.city,
-    
-    required this.date,
+    required this.chaletName,
+    required this.totalPrice,
+    required this.startDate,
+    required this.endDate,
   });
+  Chalet.fromJson(Map<String, dynamic> json)
+      : //name = json['name'],
+        clientName = json['usernamr'],
+        chaletName = json['name'],
+        totalPrice = json['total_prise'],
+        startDate = json['date'],
+        endDate = json['end'];
 }
 
-// ReservationsScreen widget
-class ReservationsScreen extends StatelessWidget {
-  // Manually added list of chalets
-  final List<Chalet> allChalets = [
-    Chalet(
-      name: 'Amer',
-      price: '200',
-      photo: 'assets/images/img1.jpg', // Replace with your asset or network image
-      clientName: 'John Doe',
-      city: 'City A',
-  
+class ReservationsScreen extends StatefulWidget {
 
-      date: '2024-01-05',
-    ),
-    Chalet(
-      name: 'Amer',
-      price: '250',
-      photo: 'assets/images/img2.jpg', // Replace with your asset or network image
-      clientName: 'Jane Smith',
-      city: 'City B',
-    
-      date: '2024-01-06',
-    ),
-    Chalet(
-      name: 'Amer',
-      price: '300',
-      photo: 'assets/images/img3.jpg', // Replace with your asset or network image
-      clientName: 'Alice Johnson',
-      city: 'City C',
-  
-      date: '2024-01-07',
-    ),
-    Chalet(
-      name: 'Omar',
-      price: '350',
-      photo: 'assets/images/img4.jpg', // Replace with your asset or network image
-      clientName: 'Bob Brown',
-      city: 'City D',
+  @override
+  _ReservationsScreenState createState() => _ReservationsScreenState();
+}
 
-      date: '2024-01-08',
-    ),
-  ];
+class _ReservationsScreenState extends State<ReservationsScreen> {
+  List<Chalet> chalets = [];
+  late SharedPreferences prefs;
+  String? token;
+  String? username;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token');
+    username = prefs.getString('username');
+
+    if (token == null || username == null) {
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/Reservations/${username}'),
+        headers: {'Authorization': '$token'},
+        );
+
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        List<dynamic> data = json.decode(response.body);
+        List<Chalet> fetchedChalets = data.map((item) => Chalet.fromJson(item)).toList();
+
+        setState(() {
+          chalets = fetchedChalets;
+        });
+      } else {
+        // If the server did not return a 200 OK response,
+        // throw an exception.
+        throw Exception('Failed to load chalets');
+      }
+    } catch (error) {
+      print(error.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Filter the list to include only chalets with the name 'Amer'
-    final chaletsNamedAmer = allChalets.where((chalet) => chalet.name == 'Amer').toList();
+    final chaletsNamedAmer = chalets.toList();
 
     return Scaffold(
       appBar: AppBar(
-      backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
           onPressed: () => Navigator.of(context).pop(),
-          
         ),
-        title: Text('Reservations ', style: TextStyle(color: Colors.redAccent),),
+        title: Text(
+          'Reservations',
+          style: TextStyle(color: Colors.redAccent),
+        ),
         centerTitle: true,
       ),
       body: ListView.builder(
@@ -91,7 +107,6 @@ class ReservationsScreen extends StatelessWidget {
   }
 }
 
-// ChaletListItem widget
 class ChaletListItem extends StatelessWidget {
   final Chalet chalet;
 
@@ -100,29 +115,54 @@ class ChaletListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 3,
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              chalet.photo,
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
+            Row(
+              children: [
+                Icon(Icons.home, size: 32, color: Colors.redAccent),
+                SizedBox(width: 8),
+                Text(
+                  'Chalet Name: ${chalet.chaletName}',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(chalet.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('Total Price: ${chalet.price}'),
-                  Text('Client Name: ${chalet.clientName}'),
-                  Text('City: ${chalet.city}'),
-                  
-                  Text('Date: ${chalet.date}'),
-                ],
-              ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.person, size: 24, color: Colors.redAccent),
+                SizedBox(width: 8),
+                Text('Client Name: ${chalet.clientName}', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.attach_money, size: 24, color: Colors.redAccent),
+                SizedBox(width: 8),
+                Text('Total Price: ${chalet.totalPrice}', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 24, color: Colors.redAccent),
+                SizedBox(width: 8),
+                Text('Start Date: ${chalet.startDate}', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 24, color: Colors.redAccent),
+                SizedBox(width: 8),
+                Text('End Date: ${chalet.endDate}', style: TextStyle(fontSize: 16)),
+              ],
             ),
           ],
         ),
