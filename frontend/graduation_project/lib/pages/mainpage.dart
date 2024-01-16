@@ -4,7 +4,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/pages/HomePage.dart';
 import 'package:graduation_project/pages/Maps.dart';
-import 'package:graduation_project/pages/favorite.dart';
+import 'package:graduation_project/pages/Chat.dart';
 import 'package:graduation_project/pages/notificationpage.dart';
 import 'package:graduation_project/pages/profile.dart';
 
@@ -20,7 +20,7 @@ class Mainpage extends StatefulWidget {
 class _MainpageState extends State<Mainpage> {
   int index =2;
   final Screens = [
-    Favorite(),
+    UsersListPage(),
     Maps(),
     Homepage(),
     NotificationPage(),
@@ -31,7 +31,7 @@ class _MainpageState extends State<Mainpage> {
   Widget build(BuildContext context) {
     final items = <Widget>[
       Icon(
-        Icons.favorite,
+        Icons.chat,
         color: Colors.redAccent,
         size: 30,
       ),
