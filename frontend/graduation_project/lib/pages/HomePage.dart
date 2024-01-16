@@ -17,6 +17,7 @@ import 'dart:math' as math;
 
 class Chalet {
   String name;
+  String nameuser;
   String price;
   File photo;
   String numberOfRooms;
@@ -28,6 +29,7 @@ class Chalet {
   String city;
   Chalet({
     required this.name,
+    required this.nameuser,
     required this.price,
     required this.photo,
     required this.numberOfRooms,
@@ -42,6 +44,7 @@ class Chalet {
   Map<String, dynamic> toMap() {
     return {
       'name': name,
+      'nameuser':nameuser,
       'price': price,
       'photo': photo.path,
       'numberOfRooms': numberOfRooms,
@@ -57,6 +60,7 @@ class Chalet {
   factory Chalet.fromMap(Map<String, dynamic> map, bool isFavorite) {
     return Chalet(
       city: map['location'] ?? '',
+      nameuser: map['nameuser'] ?? '',
       description: map['description'] ?? '',
       name: map['name'] ?? '',
       price: map['prise'].toString() ??
@@ -182,8 +186,10 @@ class _HomepageState extends State<Homepage> {
     LatLng position,
     bool hasSwimmingPool,
     String description,
+    String nameuser,
   ) async {
     final newChalet = Chalet(
+      nameuser: nameuser,
       city: city,
       description: description,
       name: name,
@@ -282,6 +288,7 @@ class _HomepageState extends State<Homepage> {
 
   Future<void> _showAddChaletDialog() async {
     String city = '';
+    String nameuser = '';
     String chaletName = '';
     String chaletPrice = '';
     String numberOfRooms = '';
@@ -418,6 +425,7 @@ class _HomepageState extends State<Homepage> {
                         position,
                         hasSwimmingPool,
                         description,
+                        nameuser,
                       );
                       Navigator.of(context).pop();
                     }

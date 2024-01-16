@@ -341,12 +341,20 @@ class _PostScreenState extends State<PostScreen> {
                   Text(
                     '\$${widget.chalet.price} / day',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 8),
+                  Text(
+                    'Chalet owner: ${widget.chalet.nameuser}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 9),
                   Text(
                     '${widget.chalet.description}',
                     style: TextStyle(
@@ -354,7 +362,7 @@ class _PostScreenState extends State<PostScreen> {
                       color: Colors.grey[800],
                     ),
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 9),
                   Text(
                     'What we offer',
                     style: TextStyle(
