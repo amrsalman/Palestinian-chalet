@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduation_project/pages/chat2.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class User {
   final String userName;
@@ -16,18 +18,33 @@ class UsersListPage extends StatefulWidget {
 
 class _UsersListPageState extends State<UsersListPage> {
   final TextEditingController _searchController = TextEditingController();
-  List<User> users = [
-    User('AmerZagha'),
-    User('AmrSalman'),
-    User('mohammadZagha'),
-    User('Zainab'),
-  ];
+  List<User> users = [];
   List<User> filteredUsers = [];
 
   @override
   void initState() {
     super.initState();
-    filteredUsers = users;
+    fetchUsers();
+  }
+
+  Future<void> fetchUsers() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/user'));
+    
+    if (response.statusCode == 200) {
+      print("////////////////////////////////////////////////////////////////////////////////////");
+      // If server returns an OK response, parse the JSON
+      List<dynamic> data = jsonDecode(response.body);
+      List<User> fetchedUsers = data.map((user) => User(user['username'])).toList();
+      setState(() {
+        users = fetchedUsers;
+        filteredUsers = fetchedUsers;
+      });
+    } else {
+      print("###############################################################################");
+      // If the server did not return a 200 OK response,
+      // throw an exception.
+      throw Exception('Failed to load users');
+    }
   }
 
   void _filterUsers(String query) {
