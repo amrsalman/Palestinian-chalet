@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "659701809599",
+    "project_id": "chat-82438",
+    "storage_bucket": "chat-82438.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659701809599:android:2b4e510ef445ea998d610a",
+        "android_client_info": {
+          "package_name": "com.salman.graduation_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACADiDvT6FkvzlYwvwi0a3WoJdxnPdtx4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

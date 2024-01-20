@@ -9,11 +9,13 @@ import 'package:graduation_project/utils/User_preferneces.dart';
 
 import 'pages/login.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
+
   await _initHive();
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await UserPreferences.init();
   runApp(const MainApp());
 }
