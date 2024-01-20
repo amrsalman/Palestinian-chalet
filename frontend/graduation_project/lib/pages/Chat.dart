@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graduation_project/pages/chat2.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
   final String userName;
@@ -28,19 +29,30 @@ class _UsersListPageState extends State<UsersListPage> {
   }
 
   Future<void> fetchUsers() async {
+    final prefs = await SharedPreferences.getInstance();
+
+   // Retrieve the token from shared preferences
+   final String? token = prefs.getString('token');
+   print('token: ${token}');
+   final String? username = prefs.getString('username');
+   if (token == null || username == null) {
+     // Handle the case where the token is not available
+     // You might want to redirect the user to the login screen
+     return;
+    }
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/user'));
     
     if (response.statusCode == 200) {
-      print("////////////////////////////////////////////////////////////////////////////////////");
       // If server returns an OK response, parse the JSON
       List<dynamic> data = jsonDecode(response.body);
       List<User> fetchedUsers = data.map((user) => User(user['username'])).toList();
+      // Remove the current user from the list
+      fetchedUsers.removeWhere((user) => user.userName == username);
       setState(() {
         users = fetchedUsers;
         filteredUsers = fetchedUsers;
       });
     } else {
-      print("###############################################################################");
       // If the server did not return a 200 OK response,
       // throw an exception.
       throw Exception('Failed to load users');
