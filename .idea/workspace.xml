@@ -5,12 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d1bad7-2dc5-4219-b2c9-8a2c30da36dc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/Favorites.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/Favorites.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/HomePage.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/HomePage.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/Maps.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/Maps.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/PostScreen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/PostScreen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/search.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/search.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/routes/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/chat2.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/chat2.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/login.dart" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/lib/pages/login.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/linux/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/linux/flutter/generated_plugin_registrant.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/linux/flutter/generated_plugins.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/generated_plugin_registrant.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/graduation_project/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

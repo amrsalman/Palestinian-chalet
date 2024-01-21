@@ -220,6 +220,7 @@ class _LoginState extends State<Login> {
                         
                       }*/
                       _login();
+                      Provider.of<AppProvider>(context,listen:false).connectToServer();
                     },
                     child: const Text(
                       "الدخول",

@@ -4,14 +4,18 @@ const router = express.Router();
 const { user, verify } = require("../models");
 const crypto = require("crypto");
 const sendEmail = require("../assets/sendEmail");
+const { getUserSocket } = require("../socket");
 router
   .route("/user")
   .get((req, res) => {
     async function x() {
+      //sok=getUserSocket("ahmad");
+      //sok.emit("newMessage",data);
       return await user.findAll({
         where: { level: 0, verification: true },
       });
     }
+    // Socket.emit("newMessage",data);
     (async () => {
       res.json(await x());
     })();

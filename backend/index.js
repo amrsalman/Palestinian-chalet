@@ -6,11 +6,16 @@ const imageRoute = require("./routes/image");
 const chalesRoute = require("./routes/chales");
 const bookchaletRoute = require("./routes/bookchalet");
 const favoriteRoute = require("./routes/favorite");
+const http = require("http");
+const { Server } = require("socket.io");
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 const path = require("path");
 const port = process.env.PORT;
 
 const cors = require("cors");
+const { addUserSocket, notifyUser, removeUserSocket } = require("./socket");
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -24,7 +29,20 @@ app.use("/api/v1/", imageRoute);
 app.use("/api/v1/", chalesRoute);
 app.use("/api/v1/", bookchaletRoute);
 app.use("/api/v1/", favoriteRoute);
-app.listen(port, () => console.log(`server running in port ${port}`));
+io.on("connection", (socket) => {
+  console.log("A user connected");
+  socket.on("login", (data) => {
+    addUserSocket(data, socket);
+    notifyUser(data, "test notify");
+  });
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+    removeUserSocket(socket);
+  });
+});
+server.listen(port, "0.0.0.0", () =>
+  console.log(" Server ready at: http://localhost " + port)
+);
 
 async function c() {
   try {

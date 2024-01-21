@@ -40,7 +40,13 @@ class _MainAppState extends State<MainApp> {
   }
 
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MultiProviders(
+      providers:[
+        ChangeNotifierProvider(
+          create:(context)=>AppProvider(),
+        ),
+      ],
+      child:MaterialApp(
       debugShowCheckedModeBanner: false,
           
       initialRoute: '/',
@@ -54,6 +60,7 @@ class _MainAppState extends State<MainApp> {
       },
         
     
+    );
     );
   }
 }
