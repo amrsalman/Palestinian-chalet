@@ -4,6 +4,16 @@ const router = express.Router();
 const { user, verify } = require("../models");
 const crypto = require("crypto");
 const sendEmail = require("../assets/sendEmail");
+router.route("/all").get((req, res) => {
+  async function x() {
+    return await user.findAll({
+      where: { level: 0 },
+    });
+  }
+  (async () => {
+    res.json(await x());
+  })();
+});
 router
   .route("/user")
   .get((req, res) => {

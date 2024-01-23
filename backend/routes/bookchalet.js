@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { bookchalet, chales } = require("../models");
+const { bookchalet, chales, notifications } = require("../models");
 const verifyToken = require("../assets/jwtMiddleware");
 const { Sequelize } = require("sequelize");
 const dayjs = require("dayjs");
@@ -63,7 +63,12 @@ router
         done: false,
         total_prise: total_prise,
       });
-
+      // Save the notification to the database
+     const newNotification = await notifications.create({
+      title: "Reservations",
+      message: "you have a new reservation for " + chalet.name,
+      user: chalet.nameuser,
+     });
       res.status(201).json(booking);
     } catch (error) {
       console.error(error);

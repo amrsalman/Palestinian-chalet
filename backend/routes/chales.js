@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { chales } = require("../models");
+const { chales, notifications } = require("../models");
 const multer = require("multer");
 const path = require("path");
 const verifyToken = require("../assets/jwtMiddleware");
@@ -83,17 +83,29 @@ router.route("/chales/agree/:name").patch(async (req, res) => {
       return res.status(404).json({ error: "Chale not found" });
     }
 
-    // Update the 'done' field to true (assuming 'done' is a boolean field)
-    chale.done = true;
+    // Update the 'done' field to true if it exists
+    if ("done" in chale) {
+      chale.done = true;
 
-    // Save the updated chale
-    await chale.save();
+      // Save the updated chale
+      await chale.save();
 
-    res.json({ message: "Chale agreed to be added successfully" });
+      // Save the notification to the database
+      const newNotification = await notifications.create({
+        title: "Accept Chalete",
+        message: "admen has accepted chalete " + chaleId,
+        user: chale.nameuser,
+      });
+
+      res.json({ message: "Chale agreed to be added successfully" });
+    } else {
+      return res.status(400).json({ error: "Invalid chale object" });
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 // New route to delete a chale by ID
 router.route("/chales/delete/:id/nameuser/:user").delete(async (req, res) => {
   try {
@@ -187,6 +199,12 @@ router.route("/chales/admin/delete/:id").delete(async (req, res) => {
 
     // Delete the chale
     await chale.destroy();
+    // Save the notification to the database
+    const newNotification = await notifications.create({
+      title: "Delete Chalete",
+      message: "admen has delete chalete " + chaleId,
+      user: chale.nameuser,
+    });
 
     res.json({ message: "Chale deleted successfully" });
   } catch (error) {

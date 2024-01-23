@@ -6,6 +6,7 @@ const imageRoute = require("./routes/image");
 const chalesRoute = require("./routes/chales");
 const bookchaletRoute = require("./routes/bookchalet");
 const favoriteRoute = require("./routes/favorite");
+const notificationRoute = require("./routes/notifications");
 const app = express();
 const path = require("path");
 const port = process.env.PORT;
@@ -24,6 +25,7 @@ app.use("/api/v1/", imageRoute);
 app.use("/api/v1/", chalesRoute);
 app.use("/api/v1/", bookchaletRoute);
 app.use("/api/v1/", favoriteRoute);
+app.use("/api/v1/", notificationRoute);
 app.listen(port, () => console.log(`server running in port ${port}`));
 
 async function c() {

@@ -18,7 +18,6 @@ function fetchAndDisplayBookings(token) {
             <td>${booking.date}</td>
             <td>${booking.end}</td>
             <td>${booking.total_prise}</td>
-            <td>${booking.done}</td>
           `;
         tableBody.appendChild(row);
       });
