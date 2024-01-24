@@ -7,6 +7,10 @@ import 'mainpage.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:graduation_project/pages/Forget_Password.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:web_socket_channel/io.dart';
+
 class Login extends StatefulWidget {
   const Login({
     Key? key,
@@ -38,7 +42,18 @@ class _LoginState extends State<Login> {
         final data = json.decode(response.body);
         await _saveUserData(data['token'], data['user']['username']);
         print('Logged in: ${data['user']['username']}');
+        // Initialize WebSocket channel after successful login
+        final IOWebSocketChannel channel =
+            IOWebSocketChannel.connect('ws://10.0.2.2:8081?user=${data['user']['username']}');
+        channel.stream.listen((message) {
+          print("////////////////////////////////////////////////");
+          print(message);
+          // Handle WebSocket message
+          showNotification(message);
+        });
         // Navigate to the next screen or perform necessary actions
+         // تحديث اسم المستخدم في مزود حالة المستخدم
+        //Provider.of<UserProvider>(context, listen: false).setUsername(data['user']['username']);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -75,6 +90,17 @@ class _LoginState extends State<Login> {
       );
     }
   }
+  Future<void> showNotification(String message) async {
+  await AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 1,
+      channelKey: 'Basic Channel',
+      title: 'New',
+      body: message,
+    ),
+  );
+}
+
 
   Future<void> _saveUserData(String token, String username) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

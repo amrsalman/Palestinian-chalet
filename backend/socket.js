@@ -13,6 +13,7 @@ const server = http.createServer((req, res) => {
 
 const io = new WebSocketServer({ server });
 const clients = new Map();
+const xu = new Map();
 
 /*io.on("connection", (client) => {
   console.log("Client connected !");
@@ -24,44 +25,51 @@ const clients = new Map();
 
 io.on("connection", (socket, req) => {
   // Extracting username from URL query parameters
+  const user = new URL(req.url, "http://fakehost").searchParams.get("user");
   const sender = new URL(req.url, "http://fakehost").searchParams.get("sender");
   const receiver = new URL(req.url, "http://fakehost").searchParams.get(
     "receiver"
   );
   console.log("sender: ", sender);
   console.log("resever: ", receiver);
+  if (sender && receiver) {
+    // Fetch existing messages from the database for the given sender and receiver
+    // Use your Sequelize model (Message) to query the database
+    message
+      .findAll({
+        where: {
+          [Op.or]: [
+            {
+              sender: sender,
+              receiver: receiver,
+            },
+            {
+              sender: receiver,
+              receiver: sender,
+            },
+          ],
+        },
+        order: [["sentAt", "ASC"]], // Adjust the order as needed
+      })
+      .then((existingMessages) => {
+        // Send existing messages to the connected client
+        socket.send(JSON.stringify(existingMessages));
+      })
+      .catch((error) => {
+        console.error("Error fetching existing messages:", error);
+      });
 
-  // Fetch existing messages from the database for the given sender and receiver
-  // Use your Sequelize model (Message) to query the database
-  message
-    .findAll({
-      where: {
-        [Op.or]: [
-          {
-            sender: sender,
-            receiver: receiver,
-          },
-          {
-            sender: receiver,
-            receiver: sender,
-          },
-        ],
-      },
-      order: [["sentAt", "ASC"]], // Adjust the order as needed
-    })
-    .then((existingMessages) => {
-      // Send existing messages to the connected client
-      socket.send(JSON.stringify(existingMessages));
-    })
-    .catch((error) => {
-      console.error("Error fetching existing messages:", error);
+    clients.set(sender, socket);
+    socket.on("message", (msg) => {
+      console.log(`Message from ${sender} to ${receiver}: ${msg}`);
+      sendMessage(sender, receiver, msg);
     });
-
-  clients.set(sender, socket);
-  socket.on("message", (msg) => {
-    console.log(`Message from ${sender} to ${receiver}: ${msg}`);
-    sendMessage(sender, receiver, msg);
-  });
+  }
+  if (user) {
+    xu.set(user, socket);
+    console.log("not");
+    socket.send("not");
+  }
 });
 
 function broadcast(msg) {
@@ -88,6 +96,11 @@ async function sendNotification(message, receiver) {
     });
   } catch (error) {
     console.error("Error saving notification:", error);
+  }
+  const user = receiver;
+  const senderSocket = xu.get(user);
+  if (senderSocket && senderSocket.readyState === WebSocket.OPEN) {
+    senderSocket.send(`${message}`);
   }
 }
 
