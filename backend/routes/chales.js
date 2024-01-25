@@ -5,6 +5,7 @@ const multer = require("multer");
 const path = require("path");
 const verifyToken = require("../assets/jwtMiddleware");
 const { Op } = require("sequelize");
+const { sendNotificationrealtaim } = require("../socket");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(
@@ -96,7 +97,8 @@ router.route("/chales/agree/:name").patch(async (req, res) => {
         message: "admen has accepted chalete " + chaleId,
         user: chale.nameuser,
       });
-
+      const x = "admen has accepted chalete " + chaleId;
+      sendNotificationrealtaim(chale.nameuser, x);
       res.json({ message: "Chale agreed to be added successfully" });
     } else {
       return res.status(400).json({ error: "Invalid chale object" });
@@ -205,7 +207,8 @@ router.route("/chales/admin/delete/:id").delete(async (req, res) => {
       message: "admen has delete chalete " + chaleId,
       user: chale.nameuser,
     });
-
+    const x = "admen has delete chalete " + chaleId;
+    sendNotificationrealtaim(chale.nameuser, x);
     res.json({ message: "Chale deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });

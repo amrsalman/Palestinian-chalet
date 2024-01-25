@@ -4,6 +4,7 @@ const { bookchalet, chales, notifications } = require("../models");
 const verifyToken = require("../assets/jwtMiddleware");
 const { Sequelize } = require("sequelize");
 const dayjs = require("dayjs");
+const { sendNotificationrealtaim } = require("../socket");
 router.use(verifyToken);
 
 router
@@ -64,11 +65,13 @@ router
         total_prise: total_prise,
       });
       // Save the notification to the database
-     const newNotification = await notifications.create({
-      title: "Reservations",
-      message: "you have a new reservation for " + chalet.name,
-      user: chalet.nameuser,
-     });
+      const newNotification = await notifications.create({
+        title: "Reservations",
+        message: "you have a new reservation for " + chalet.name,
+        user: chalet.nameuser,
+      });
+      const x = "you have a new reservation for " + chalet.name;
+      sendNotificationrealtaim(chalet.nameuser, x);
       res.status(201).json(booking);
     } catch (error) {
       console.error(error);

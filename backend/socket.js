@@ -67,8 +67,8 @@ io.on("connection", (socket, req) => {
   }
   if (user) {
     xu.set(user, socket);
-    console.log("not");
-    socket.send("not");
+    console.log("You have logged in to your account");
+    socket.send("You have logged in to your account");
   }
 });
 
@@ -98,6 +98,10 @@ async function sendNotification(message, receiver) {
     console.error("Error saving notification:", error);
   }
   const user = receiver;
+  sendNotificationrealtaim(user, message);
+}
+
+async function sendNotificationrealtaim(user, message) {
   const senderSocket = xu.get(user);
   if (senderSocket && senderSocket.readyState === WebSocket.OPEN) {
     senderSocket.send(`${message}`);
@@ -152,3 +156,5 @@ async function c() {
 }
 
 c();
+
+module.exports.sendNotificationrealtaim = sendNotificationrealtaim;
