@@ -133,6 +133,7 @@ class _MapshState extends State<Maps> {
             infoWindow: InfoWindow(
               title: chalet.name,
               snippet: 'Price: \$${chalet.prise}',
+              
             ),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueRed),
@@ -151,7 +152,7 @@ class _MapshState extends State<Maps> {
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: initialPosition,
-          zoom: 8,
+          zoom: 17,
         ),
         onMapCreated: (GoogleMapController controller) {
           mapController = controller;

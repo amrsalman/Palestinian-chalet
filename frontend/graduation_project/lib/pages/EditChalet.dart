@@ -154,6 +154,12 @@ class _EditChaletState extends State<EditChalet> {
     }
   }
 
+  void _showSearch() {
+    showSearch(
+      context: context,
+      delegate: ChaletSearchDelegate(allChalets: allChalets),
+    );
+  }
 
  @override
   Widget build(BuildContext context) {
@@ -167,6 +173,12 @@ class _EditChaletState extends State<EditChalet> {
           icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search, color: Colors.redAccent),
+            onPressed: _showSearch,
+          ),
+        ],
         title: Text('Edit Chalets ',style: TextStyle(color: Colors.redAccent),),
         centerTitle: true,
       ),
@@ -336,6 +348,75 @@ class _ChaletListItemState extends State<ChaletListItem> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ChaletSearchDelegate extends SearchDelegate<Chalet?> {
+  final List<Chalet> allChalets;
+
+  ChaletSearchDelegate({required this.allChalets});
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+          showSuggestions(context);
+        },
+      ),
+    ];
+  }
+
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    List<Chalet> filteredChalets = allChalets.where((chalet) {
+      return chalet.name.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    return ListView.builder(
+      itemCount: filteredChalets.length,
+      itemBuilder: (context, index) {
+        return ChaletListItem(
+          chalet: filteredChalets[index],
+          onUpdate: (updatedChalet) {
+            // Perform the update logic
+          },
+        );
+      },
+    );
+  }
+
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<Chalet> suggestedChalets = allChalets.where((chalet) {
+      return chalet.name.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    return ListView.builder(
+      itemCount: suggestedChalets.length,
+      itemBuilder: (context, index) {
+        return ChaletListItem(
+          chalet: suggestedChalets[index],
+          onUpdate: (updatedChalet) {
+            // Perform the update logic
+          },
+        );
+      },
     );
   }
 }

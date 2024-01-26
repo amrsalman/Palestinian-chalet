@@ -6,11 +6,6 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor:  Colors.redAccent,
-        title: const Text('Welcome', style: TextStyle(fontSize: 30),),
-        centerTitle: true,
-      ),
       body:
        Container(
         

@@ -48,6 +48,13 @@ class _NumberOfReservationsState extends State<NumberOfReservations> {
     }
   }
 
+  void _showSearch(BuildContext context) {
+    showSearch(
+      context: context,
+      delegate: ChaletSearchDelegate(allChalets: myBookedChalets),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +65,12 @@ class _NumberOfReservationsState extends State<NumberOfReservations> {
           icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search, color: Colors.redAccent),
+            onPressed: () => _showSearch(context),
+          ),
+        ],
         title: Text('Your Reservations', style: TextStyle(color: Colors.redAccent)),
         centerTitle: true,
       ),
@@ -161,6 +174,77 @@ class ChaletGridItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ChaletSearchDelegate extends SearchDelegate<Chalet?> {
+  final List<Chalet> allChalets;
+
+  ChaletSearchDelegate({required this.allChalets});
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+          showSuggestions(context);
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    List<Chalet> filteredChalets = allChalets.where((chalet) {
+      return chalet.name.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1 / 1.2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: filteredChalets.length,
+      padding: EdgeInsets.all(10),
+      itemBuilder: (context, index) {
+        return ChaletGridItem(chalet: filteredChalets[index]);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<Chalet> suggestedChalets = allChalets.where((chalet) {
+      return chalet.name.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1 / 1.2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: suggestedChalets.length,
+      padding: EdgeInsets.all(10),
+      itemBuilder: (context, index) {
+        return ChaletGridItem(chalet: suggestedChalets[index]);
+      },
     );
   }
 }

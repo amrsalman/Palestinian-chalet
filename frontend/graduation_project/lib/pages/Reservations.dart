@@ -79,6 +79,13 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
     }
   }
 
+  void _showSearch(BuildContext context) {
+    showSearch(
+      context: context,
+      delegate: CustomSearchDelegate(allChalets: chalets),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chaletsNamedAmer = chalets.toList();
@@ -91,6 +98,12 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
           icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search, color: Colors.redAccent),
+            onPressed: () => _showSearch(context),
+          ),
+        ],
         title: Text(
           'Reservations',
           style: TextStyle(color: Colors.redAccent),
@@ -167,6 +180,61 @@ class ChaletListItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class CustomSearchDelegate extends SearchDelegate {
+  final List<Chalet> allChalets;
+
+  CustomSearchDelegate({required this.allChalets});
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    List<Chalet> filteredChalets = allChalets.where((chalet) {
+      return chalet.clientName.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    return ListView.builder(
+      itemCount: filteredChalets.length,
+      itemBuilder: (context, index) {
+        return ChaletListItem(chalet: filteredChalets[index]);
+      },
+    );
+  }
+   @override
+  Widget buildSuggestions(BuildContext context) {
+    List<Chalet> suggestedChalets = allChalets.where((chalet) {
+      return chalet.clientName.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    return ListView.builder(
+      itemCount: suggestedChalets.length,
+      itemBuilder: (context, index) {
+        return ChaletListItem(chalet: suggestedChalets[index]);
+      },
     );
   }
 }

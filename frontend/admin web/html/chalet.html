@@ -53,6 +53,26 @@
     <main class="container">
       <section>
         <h2 class="mb-4">Chalets Shown In The Application</h2>
+        <section class="mb-3">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              id="searchInput"
+              placeholder="Search by chalet name"
+            />
+            <div class="input-group-append">
+              <!-- Update onclick attribute to call searchByUsername function -->
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                onclick="searchByUsername()"
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        </section>
         <div class="table-responsive">
           <table class="table table-striped">
             <thead class="thead-dark">
@@ -72,6 +92,16 @@
             </thead>
             <tbody id="tableBody"></tbody>
           </table>
+        </div>
+      </section>
+      <!-- Pagination Section -->
+      <section>
+        <div class="pagination justify-content-center">
+          <ul class="pagination">
+            <!-- Generate pagination links dynamically -->
+
+            <!-- Add more links as needed -->
+          </ul>
         </div>
       </section>
     </main>

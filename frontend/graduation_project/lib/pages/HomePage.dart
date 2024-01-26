@@ -14,8 +14,10 @@ import 'package:path/path.dart' as path;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math' as math;
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class Chalet {
+  double ranking;
   String name;
   String nameuser;
   String price;
@@ -39,6 +41,7 @@ class Chalet {
     required this.path,
     required this.description,
     required this.city,
+    this.ranking = 0.0,
   });
 
   Map<String, dynamic> toMap() {
@@ -54,6 +57,7 @@ class Chalet {
       },
       'hasSwimmingPool': hasSwimmingPool,
       'isFavorite': isFavorite,
+      'ranking': ranking,
     };
   }
 
@@ -92,6 +96,7 @@ class Chalet {
               .replaceAll('\\', '/')
           : map['main_image'],
       isFavorite: isFavorite,
+      ranking: map['ranking'] != null ? map['ranking'].toDouble() : 0.0,
     );
   }
 }
@@ -103,6 +108,9 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   List<Chalet> chalets = [];
+  String filterCity = '';
+  bool? filterHasSwimmingPool;
+  bool isFilterApplied = false;
 
   @override
   void initState() {
@@ -576,111 +584,256 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(90.0),
-        child: HomeAppBar(
-          onFavoritePressed: _navigateToFavoritesScreen,
-          onSearchPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SearchScreen(allChalets: chalets),
+
+       void _showFilterDialog() {
+    // Temporary state for the dialog
+    String tempFilterCity = filterCity;
+    bool? tempHasSwimmingPool = filterHasSwimmingPool;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Filter Chalets'),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Text field for city name
+                  TextField(
+                    onChanged: (value) {
+                      tempFilterCity = value;
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'City Name',
+                      hintText: 'Type the city name',
+                    ),
+                  ),
+                  // Swimming pool filter
+                  SwitchListTile(
+                    title: Text('Has Swimming Pool'),
+                    value: tempHasSwimmingPool ?? false,
+                    onChanged: (bool value) {
+                      setState(() {
+                        tempHasSwimmingPool = value;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Apply'),
+              onPressed: () {
+                setState(() {
+        filterCity = tempFilterCity;
+        filterHasSwimmingPool = tempHasSwimmingPool;
+        isFilterApplied = true; // Set the flag to true since filters are applied
+      });
+      Navigator.of(context).pop();
+    },
+            ),
+          ],
+        );
+      },
+    );
+  }
+   void _resetFilters() {
+    setState(() {
+      filterCity = '';
+      filterHasSwimmingPool = null;
+      isFilterApplied = false;
+    });
+  }
+
+  // Helper method to apply filters
+  List<Chalet> applyFilters() {
+    return chalets.where((chalet) {
+      // City filter check
+      final bool cityMatch = filterCity.isEmpty || chalet.city.toLowerCase().contains(filterCity.toLowerCase());
+      // Swimming pool filter check
+      final bool poolMatch = filterHasSwimmingPool == null || chalet.hasSwimmingPool == filterHasSwimmingPool;
+      return cityMatch && poolMatch;
+    }).toList();
+  }
+
+Future<void> _showRankingDialog(Chalet chalet) async {
+  double currentRanking = chalet.ranking; // Assuming `ranking` is already a double and not null
+
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // User must tap a button to close the dialog
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('DO YOU LIKE OUR CHALET?'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Give us a quick rating so we know if you like it'),
+              RatingBar.builder(
+                initialRating: currentRanking,
+                itemCount: 5,
+                wrapAlignment: WrapAlignment.center, // This will center the icons
+                itemBuilder: (context, index) {
+                  switch (index) {
+                    case 0:
+                      return Icon(
+                        Icons.sentiment_very_dissatisfied,
+                        color: Colors.red,
+                      );
+                    case 1:
+                      return Icon(
+                        Icons.sentiment_dissatisfied,
+                        color: Colors.redAccent,
+                      );
+                    case 2:
+                      return Icon(
+                        Icons.sentiment_neutral,
+                        color: Colors.amber,
+                      );
+                    case 3:
+                      return Icon(
+                        Icons.sentiment_satisfied,
+                        color: Colors.lightGreen,
+                      );
+                    case 4:
+                      return Icon(
+                        Icons.sentiment_very_satisfied,
+                        color: Colors.green,
+                      );
+                    default:
+                      return Container();
+                  }
+                },
+                onRatingUpdate: (rating) {
+                  // Update the current ranking
+                  currentRanking = rating;
+                },
               ),
-            );
-          },
+            ],
+          ),
         ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancel', style: TextStyle(color: Colors.redAccent),),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: Text('Apply',  style: TextStyle(color: Colors.redAccent),),
+          
+            onPressed: () {
+              setState(() {
+                chalet.ranking = currentRanking;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+ @override
+ Widget build(BuildContext context) {
+   List<Chalet> filteredChalets = applyFilters();
+    return Scaffold(
+      appBar: HomeAppBar(
+        onFavoritePressed: _navigateToFavoritesScreen,
+        onSearchPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SearchScreen(allChalets: chalets),
+            ),
+          );
+        },
+        onFilterPressed: _showFilterDialog,
+        // Add a flag to conditionally show the "Remove Filter" button
+        showRemoveFilterButton: isFilterApplied,
+        onRemoveFilterPressed: _resetFilters,
       ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30),
-          child: SingleChildScrollView(
-            child: Column(
-              children: chalets
-                  .map(
-                    (chalet) => Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: IconButton(
-                              icon: Icon(
-                                chalet.isFavorite
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: chalet.isFavorite
-                                    ? Colors.red
-                                    : Colors.grey,
-                              ),
-                              onPressed: () {
-                                _toggleFavorite(chalet);
-                              },
-                            ),
+           child: SingleChildScrollView(
+      child: Column(
+        children: filteredChalets.map((chalet) => Padding(
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  children: [
+                     Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: Icon(
+                  chalet.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: chalet.isFavorite ? Colors.red : Colors.grey,
+                ),
+                onPressed: () {
+                _toggleFavorite(chalet);;
+                },
+              ),
+            ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PostScreen(chalet: chalet),
                           ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PostScreen(chalet: chalet),
-                                ),
-                              );
-                            },
-                            onLongPress: () => _confirmDeleteChalet(chalet),
-                            child: Container(
-                              height: 200,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(15),
-                                  image: DecorationImage(
+                        );
+                      },
+                    onLongPress: () => _showRankingDialog(chalet),
+                      child: Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(15),
+image: DecorationImage(
                                     image: Image.asset(
                                       chalet.path,
                                     ).image,
                                     fit: BoxFit.cover,
                                     opacity: 0.8,
                                   )),
-                              child: Stack(
-                                children: [
-                                  Positioned(
-                                    bottom: 10,
-                                    left: 10,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          chalet.name,
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        Text(
-                                          '\$${chalet.price}',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            chalet.name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+
+                          ),
+                        Text('Rating: ${chalet.ranking?.toStringAsFixed(1) ?? "Not rated"}'),
+                          Text(
+                            '\$${chalet.price}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[600],
                             ),
                           ),
-                          SizedBox(height: 5),
                         ],
                       ),
                     ),
-                  )
-                  .toList(),
+                    SizedBox(height: 5),
+                  ],
+                ),
+              )).toList(),
             ),
           ),
         ),
@@ -694,7 +847,9 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      
     );
+    
   }
 }
 
@@ -730,7 +885,7 @@ class _MapScreenState extends State<MapScreen> {
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: _selectedPosition,
-          zoom: 14.0,
+          zoom: 10.0,
         ),
         markers: _markers,
         onTap: _onMapTapped,

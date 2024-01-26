@@ -256,20 +256,20 @@ class _PostScreenState extends State<PostScreen> {
           icon: Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.favorite_border, color: Colors.white),
-            onPressed: () {
-              // Handle favorite logic
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.share, color: Colors.white),
-            onPressed: () {
-              // Handle share logic
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.favorite_border, color: Colors.white),
+        //     onPressed: () {
+        //       // Handle favorite logic
+        //     },
+        //   ),
+        //   IconButton(
+        //     icon: Icon(Icons.share, color: Colors.white),
+        //     onPressed: () {
+        //       // Handle share logic
+        //     },
+        //   ),
+        // ],
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
