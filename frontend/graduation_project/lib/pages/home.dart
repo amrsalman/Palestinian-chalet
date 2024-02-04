@@ -28,7 +28,7 @@ class Home extends StatelessWidget {
                   Navigator.pushNamed(context, '/login');
               // Navigate to the second screen when tapped.
             },
-            child: const Text('User Login' ,style: TextStyle(fontSize: 25)),
+            child: const Text('User Login' ,style: TextStyle(fontSize: 25, color:Colors.black)),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.redAccent),
               padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 99, vertical: 15)),
@@ -64,7 +64,7 @@ class Home extends StatelessWidget {
                   Navigator.pushNamed(context, '/signup');
               // Navigate to the second screen when tapped.
             },
-            child: const Text('Sign up ' ,style: TextStyle(fontSize: 25),),
+            child: const Text('Sign up ' ,style: TextStyle(fontSize: 25 , color:Colors.black),),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.redAccent),
               padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 110, vertical: 15)),

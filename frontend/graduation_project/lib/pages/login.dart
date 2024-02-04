@@ -130,12 +130,16 @@ class _LoginState extends State<Login> {
         backgroundColor: Colors.redAccent,
       ),
       appBar: AppBar(
-        backgroundColor: BackColor,
-        title: const Text(
-          'Users Login',
-          style: TextStyle(fontSize: 30),
-        ),
+      backgroundColor: Colors.transparent,
+        elevation: 0,
+      //  title: const Text('Users Login', style: TextStyle(fontSize: 30,color: Colors.redAccent),),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
+          onPressed: () => Navigator.of(context).pop(),
+        )
+
+
       ),
       body: Container(
         width: double.infinity,
@@ -162,7 +166,7 @@ class _LoginState extends State<Login> {
               //  height: 200, // Set the desired height
               //),
               //const SizedBox(height: 10),
-              Text("تسجيل دخول",
+              Text("Login",
                   style: TextStyle(
                       color: MainColor,
                       fontSize: 35,
@@ -172,7 +176,7 @@ class _LoginState extends State<Login> {
                 controller: _controllerUsername,
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                  labelText: "اسم المستخدم",
+                  labelText: "User Name",
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -199,7 +203,7 @@ class _LoginState extends State<Login> {
                 obscureText: _obscurePassword,
                 keyboardType: TextInputType.visiblePassword,
                 decoration: InputDecoration(
-                  labelText: "كلمة المرور",
+                  labelText: "Password",
                   prefixIcon: const Icon(Icons.password_outlined),
                   suffixIcon: IconButton(
                       onPressed: () {
@@ -248,7 +252,7 @@ class _LoginState extends State<Login> {
                       _login();
                     },
                     child: const Text(
-                      "الدخول",
+                      "Login",
                       style: TextStyle(fontSize: 20, color: Colors.white),
                     ),
                   ),
@@ -269,11 +273,11 @@ class _LoginState extends State<Login> {
                           );
                         },
                         child: Text(
-                          "التسجيل",
+                          "Sign Up",
                           style: TextStyle(fontSize: 15, color: MainColor),
                         ),
                       ),
-                      const Text("ليس لديك حساب ؟"),
+                      const Text("<--You don't have an account"),
                     ],
                   ),
                   Row(
@@ -293,11 +297,11 @@ class _LoginState extends State<Login> {
                           );
                         },
                         child: Text(
-                          "اضغط هنا ",
+                          "Press here ",
                           style: TextStyle(fontSize: 15, color: MainColor),
                         ),
                       ),
-                      const Text(" نسيت كلمة المرور؟"),
+                      const Text("<--Forgot Password"),
                     ],
                   ),
                 ],

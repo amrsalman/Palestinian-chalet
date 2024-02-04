@@ -78,7 +78,7 @@ class _MapshState extends State<Maps> {
   Set<Polyline> _polylines = {};
   late GoogleMapController mapController;
   final LatLng initialPosition =
-      LatLng(32.22762559426675, 35.22060314459795);
+      LatLng(32.232522, 35.251196);
 
   @override
   void initState() {

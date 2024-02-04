@@ -68,7 +68,7 @@ class _SignupState extends State<Signup> {
             borderRadius: BorderRadius.circular(10),
           ),
           behavior: SnackBarBehavior.floating,
-          content: const Text("تم التسجيل بنجاح !"),
+          content: const Text("Successfully Registered"),
         ),
       );
       print('Signup successful');
@@ -107,12 +107,16 @@ class _SignupState extends State<Signup> {
         backgroundColor: Colors.redAccent,
       ),
       appBar: AppBar(
-        backgroundColor: BackColor,
-        title: const Text(
-          'Sign Up',
-          style: TextStyle(fontSize: 30),
-        ),
+      backgroundColor: Colors.transparent,
+        elevation: 0,
+      //  title: const Text('Users Login', style: TextStyle(fontSize: 30,color: Colors.redAccent),),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.redAccent),
+          onPressed: () => Navigator.of(context).pop(),
+        )
+
+
       ),
       body: Form(
         key: _formKey,
@@ -127,14 +131,14 @@ class _SignupState extends State<Signup> {
                 height: 200, // Set the desired height
               ),*/
               const SizedBox(height: 10),
-              Text("تسجيل حساب",
+              Text("Sign Up",
                   style: TextStyle(color: MainColor, fontSize: 40)),
               const SizedBox(height: 15),
               TextFormField(
                 controller: _controllerUsername,
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                  labelText: "إسم المستخدم",
+                  labelText: "UserName",
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -229,7 +233,7 @@ class _SignupState extends State<Signup> {
                 focusNode: _focusNodeEmail,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: "الإيميل",
+                  labelText: "Email",
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -254,7 +258,7 @@ class _SignupState extends State<Signup> {
                 focusNode: _focusNodeMobile,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: "رقم الجوال",
+                  labelText: "Phone Number",
                   prefixIcon: const Icon(Icons.phone),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -278,7 +282,7 @@ class _SignupState extends State<Signup> {
                 focusNode: _focusNodePassword,
                 keyboardType: TextInputType.visiblePassword,
                 decoration: InputDecoration(
-                  labelText: "كلمة المرور",
+                  labelText: "Password",
                   prefixIcon: const Icon(Icons.password_outlined),
                   suffixIcon: IconButton(
                       onPressed: () {
@@ -314,7 +318,7 @@ class _SignupState extends State<Signup> {
                 focusNode: _focusNodeConfirmPassword,
                 keyboardType: TextInputType.visiblePassword,
                 decoration: InputDecoration(
-                  labelText: "تأكيد كلمة المرور",
+                  labelText: "Confirm Password",
                   prefixIcon: const Icon(Icons.password_outlined),
                   suffixIcon: IconButton(
                       onPressed: () {
@@ -402,11 +406,11 @@ class _SignupState extends State<Signup> {
                           Navigator.pushNamed(context, '/login');
                         },
                         child: Text(
-                          "تسجيل الدخول",
+                          "Login",
                           style: TextStyle(fontSize: 15, color: MainColor),
                         ),
                       ),
-                      const Text("لديك حساب بالفعل ؟"),
+                      const Text("<--You Have a Account"),
                     ],
                   ),
                   const SizedBox(height: 20),

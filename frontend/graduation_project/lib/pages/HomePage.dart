@@ -111,6 +111,7 @@ class _HomepageState extends State<Homepage> {
   String filterCity = '';
   bool? filterHasSwimmingPool;
   bool isFilterApplied = false;
+  double? filterMaxPrice; // Add this line
 
   @override
   void initState() {
@@ -584,84 +585,102 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
+void _showFilterDialog() {
+  // Temporary state for the dialog
+  String tempFilterCity = filterCity;
+  bool? tempHasSwimmingPool = filterHasSwimmingPool;
+  double? tempMaxPrice; // New variable for maximum price
 
-       void _showFilterDialog() {
-    // Temporary state for the dialog
-    String tempFilterCity = filterCity;
-    bool? tempHasSwimmingPool = filterHasSwimmingPool;
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Filter Chalets'),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Text field for city name
-                  TextField(
-                    onChanged: (value) {
-                      tempFilterCity = value;
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'City Name',
-                      hintText: 'Type the city name',
-                    ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Filter Chalets'),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Text field for city name
+                TextField(
+                  onChanged: (value) {
+                    tempFilterCity = value;
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'City Name',
+                    hintText: 'Type the city name',
                   ),
-                  // Swimming pool filter
-                  SwitchListTile(
-                    title: Text('Has Swimming Pool'),
-                    value: tempHasSwimmingPool ?? false,
-                    onChanged: (bool value) {
-                      setState(() {
-                        tempHasSwimmingPool = value;
-                      });
-                    },
+                ),
+                // Text field for maximum price
+                TextField(
+                  onChanged: (value) {
+                    // Convert the input to double and store it in tempMaxPrice
+                    tempMaxPrice = double.tryParse(value);
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Max Price',
+                    hintText: 'Enter the maximum price',
                   ),
-                ],
-              );
+                ),
+                // Swimming pool filter
+                SwitchListTile(
+                  title: Text('Swimming Pool'),
+                  value: tempHasSwimmingPool ?? false,
+                  onChanged: (bool value) {
+                    setState(() {
+                      tempHasSwimmingPool = value;
+                    });
+                  },
+                ),
+                
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: Text('Apply'),
+            onPressed: () {
+              setState(() {
+                filterCity = tempFilterCity;
+                filterHasSwimmingPool = tempHasSwimmingPool;
+                filterMaxPrice = tempMaxPrice; // Update the max price filter
+                isFilterApplied = true;
+              });
+              Navigator.of(context).pop();
             },
           ),
-          actions: [
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Apply'),
-              onPressed: () {
-                setState(() {
-        filterCity = tempFilterCity;
-        filterHasSwimmingPool = tempHasSwimmingPool;
-        isFilterApplied = true; // Set the flag to true since filters are applied
-      });
-      Navigator.of(context).pop();
+        ],
+      );
     },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  );
+}
+
+
    void _resetFilters() {
     setState(() {
       filterCity = '';
       filterHasSwimmingPool = null;
+       filterMaxPrice = null; // Reset the maximum price filter
       isFilterApplied = false;
     });
   }
 
   // Helper method to apply filters
   List<Chalet> applyFilters() {
-    return chalets.where((chalet) {
-      // City filter check
-      final bool cityMatch = filterCity.isEmpty || chalet.city.toLowerCase().contains(filterCity.toLowerCase());
-      // Swimming pool filter check
-      final bool poolMatch = filterHasSwimmingPool == null || chalet.hasSwimmingPool == filterHasSwimmingPool;
-      return cityMatch && poolMatch;
-    }).toList();
-  }
+  return chalets.where((chalet) {
+    final bool cityMatch = filterCity.isEmpty || chalet.city.toLowerCase().contains(filterCity.toLowerCase());
+    final bool poolMatch = filterHasSwimmingPool == null || chalet.hasSwimmingPool == filterHasSwimmingPool;
+    final bool priceMatch = filterMaxPrice == null || (chalet.price.isNotEmpty && double.parse(chalet.price) <= filterMaxPrice!);
+    return cityMatch && poolMatch && priceMatch;
+  }).toList();
+}
+
 
 Future<void> _showRankingDialog(Chalet chalet) async {
   double currentRanking = chalet.ranking; // Assuming `ranking` is already a double and not null
@@ -859,7 +878,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  LatLng _selectedPosition = LatLng(32.22762559426675, 35.22060314459795);
+  LatLng _selectedPosition = LatLng(32.232522, 35.251196);
   Set<Marker> _markers = {};
 
   void _onMapTapped(LatLng position) {
@@ -885,7 +904,7 @@ class _MapScreenState extends State<MapScreen> {
         mapType: MapType.hybrid,
         initialCameraPosition: CameraPosition(
           target: _selectedPosition,
-          zoom: 10.0,
+          zoom: 17.0,
         ),
         markers: _markers,
         onTap: _onMapTapped,
